@@ -157,7 +157,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
 
 <div class="header">
   <h1>📍 Check-in de Campo</h1>
-  <p>Campanha Daniel Almeida 2026</p>
+  <p>Campanha David Almeida 2026</p>
   <div class="hora-badge" id="hora-badge">--:--:--</div>
 </div>
 
@@ -391,7 +391,7 @@ function tirarFoto() {
   // Watermark campanha
   ctx.font = "bold 12px Arial";
   ctx.fillStyle = "rgba(255,255,255,0.7)";
-  ctx.fillText("Campanha Daniel Almeida 2026", 10, 20);
+  ctx.fillText("Campanha David Almeida 2026", 10, 20);
 
   fotoBase64 = canvas.toDataURL("image/jpeg", 0.8);
 
@@ -618,7 +618,7 @@ function aceitarLGPD() {
     itens: [
       "Coleta de localização GPS durante check-ins",
       "Registro de fotos com carimbo de data/hora/coordenadas",
-      "Armazenamento dos dados pela Campanha Daniel Almeida 2026",
+      "Armazenamento dos dados pela Campanha David Almeida 2026",
     ]
   };
   localStorage.setItem("lgpd_consent", JSON.stringify(registro));
@@ -650,11 +650,7 @@ if (document.readyState === "loading") {
 </script>
 
 <!-- ══ MODAL LGPD ══════════════════════════════════ -->
-<div id="lgpd-modal" style="
-  position:fixed;inset:0;background:rgba(0,0,0,.85);
-  z-index:500;align-items:flex-end;
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
-  flex-direction:column;justify-content:flex-end">
+<div id="lgpd-modal">
 
   <div style="background:#fff;border-radius:20px 20px 0 0;
     width:100%;max-height:92vh;overflow-y:auto;
@@ -663,62 +659,93 @@ if (document.readyState === "loading") {
     <!-- Header -->
     <div style="background:#0D1F3C;border-radius:20px 20px 0 0;
       padding:20px 16px 16px;text-align:center">
-      <div style="font-size:32px;margin-bottom:6px">🔒</div>
-      <h2 style="color:#C8F0DC;font-size:17px;font-weight:700;margin:0">
+      <div style="font-size:36px;margin-bottom:8px">🔒</div>
+      <h2 style="color:#C8F0DC;font-size:17px;font-weight:700;margin:0;
+        font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif">
         Termo de Uso e Consentimento
       </h2>
-      <p style="color:#5DCAA5;font-size:11px;margin-top:4px">
+      <p style="color:#5DCAA5;font-size:11px;margin-top:6px;
+        font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif">
         Lei Geral de Proteção de Dados — Lei 13.709/2020
       </p>
     </div>
 
-    <!-- Conteúdo -->
-    <div id="lgpd-form" style="padding:20px 16px">
+    <!-- Corpo -->
+    <div id="lgpd-form" style="padding:18px 16px;
+      font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif">
 
-      <!-- Identificação -->
+      <!-- Controlador -->
       <div style="background:#EFF6FF;border-radius:10px;padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;color:#1B4F8A;
+        <div style="font-size:10px;font-weight:700;color:#1B4F8A;
           text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
           Controlador dos dados
         </div>
-        <p style="font-size:12px;color:#1C1C1C;line-height:1.6;margin:0">
-          <strong>Campanha Daniel Almeida 2026</strong><br/>
-          Coordenadora Geral: Dulce Almeida<br/>
-          Responsável jurídico: Dr. Paulo Lima<br/>
+        <p style="font-size:12px;color:#1C1C1C;line-height:1.7;margin:0">
+          <strong>Campanha David Almeida 2026</strong><br>
+          Coordenadora Geral: Dulce Almeida<br>
+          Responsável jurídico: Dr. Paulo Lima<br>
           Finalidade: controle de atividades eleitorais de campo
         </p>
       </div>
 
-      <!-- O que coletamos -->
+      <!-- O que coleta -->
       <div style="margin-bottom:14px">
         <div style="font-size:12px;font-weight:700;color:#2D3748;margin-bottom:8px">
-          📋 O que este app coleta:
+          O que este app coleta:
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          ${[
-            ["📍","Localização GPS","Latitude, longitude e precisão em metros no momento de cada check-in"],
-            ["📷","Foto com carimbo","Imagem capturada com data, hora e coordenadas gravadas na própria foto"],
-            ["👤","Dados do ativista","Nome, zona eleitoral e líder responsável informados por você"],
-            ["⏱️","Histórico de atividades","Tipo de ação, eleitores abordados e observações de cada check-in"],
-          ].map(([ico,titulo,desc]) => `
-            <div style="background:#F7F8FA;border-radius:8px;padding:10px 12px;
-              display:flex;gap:10px;align-items:flex-start">
-              <span style="font-size:18px;flex-shrink:0">${ico}</span>
-              <div>
-                <div style="font-size:12px;font-weight:600;color:#1C1C1C">${titulo}</div>
-                <div style="font-size:11px;color:#718096;margin-top:2px;line-height:1.5">${desc}</div>
-              </div>
-            </div>`).join("")}
+
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px 12px;
+          margin-bottom:6px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:20px;flex-shrink:0">📍</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#1C1C1C">Localização GPS</div>
+            <div style="font-size:11px;color:#718096;margin-top:2px;line-height:1.5">
+              Latitude, longitude e precisão em metros no momento de cada check-in
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px 12px;
+          margin-bottom:6px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:20px;flex-shrink:0">📷</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#1C1C1C">Foto com carimbo</div>
+            <div style="font-size:11px;color:#718096;margin-top:2px;line-height:1.5">
+              Imagem capturada com data, hora e coordenadas gravadas na própria foto
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px 12px;
+          margin-bottom:6px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:20px;flex-shrink:0">👤</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#1C1C1C">Dados do ativista</div>
+            <div style="font-size:11px;color:#718096;margin-top:2px;line-height:1.5">
+              Nome, zona eleitoral e líder responsável informados por você
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px 12px;
+          display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:20px;flex-shrink:0">⏱️</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#1C1C1C">Histórico de atividades</div>
+            <div style="font-size:11px;color:#718096;margin-top:2px;line-height:1.5">
+              Tipo de ação, eleitores abordados e observações de cada check-in
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Seus direitos -->
+      <!-- Direitos -->
       <div style="background:#C8F0DC;border-radius:10px;padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;color:#1A7A4A;
-          text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
+        <div style="font-size:10px;font-weight:700;color:#1A7A4A;
+          text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">
           ✅ Seus direitos garantidos pela LGPD
         </div>
-        <ul style="margin:0;padding-left:16px;font-size:12px;color:#1C1C1C;line-height:1.8">
+        <ul style="margin:0;padding-left:16px;font-size:12px;color:#1C1C1C;line-height:2">
           <li>Acessar seus dados a qualquer momento</li>
           <li>Solicitar correção de dados incorretos</li>
           <li>Revogar este consentimento quando quiser</li>
@@ -729,36 +756,60 @@ if (document.readyState === "loading") {
 
       <!-- Compartilhamento -->
       <div style="background:#FFF3CD;border-radius:10px;padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;color:#856404;
+        <div style="font-size:10px;font-weight:700;color:#856404;
           text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
           ⚠️ Compartilhamento e armazenamento
         </div>
-        <p style="font-size:12px;color:#1C1C1C;line-height:1.6;margin:0">
+        <p style="font-size:12px;color:#1C1C1C;line-height:1.7;margin:0">
           Seus dados são compartilhados <strong>apenas</strong> com a coordenação
-          da Campanha Daniel Almeida 2026 (articulador político e coordenadora Dulce Almeida)
-          para fins de controle de atividades eleitorais.<br/><br/>
+          da Campanha David Almeida 2026 (articulador político e coordenadora Dulce Almeida)
+          para fins de controle de atividades eleitorais.<br><br>
           Os dados são armazenados no dispositivo e no Google Sheets da campanha.
           Serão excluídos após o encerramento do processo eleitoral de 2026.
           <strong>Não serão vendidos ou cedidos a terceiros.</strong>
         </p>
       </div>
 
-      <!-- Checkboxes de consentimento -->
+      <!-- Checkboxes -->
       <div style="margin-bottom:14px">
         <div style="font-size:12px;font-weight:700;color:#2D3748;margin-bottom:10px">
           Para continuar, confirme que entendeu e concorda:
         </div>
-        ${[
-          ["lgpd-c1","Entendo que este app coletará minha <strong>localização GPS e fotos</strong> durante os check-ins de campo."],
-          ["lgpd-c2","Consinto com o uso dos meus dados pela <strong>Campanha Daniel Almeida 2026</strong> exclusivamente para controle de atividades eleitorais."],
-          ["lgpd-c3","Sei que posso <strong>revogar este consentimento</strong> a qualquer momento solicitando ao responsável jurídico da campanha."],
-        ].map(([id,txt]) => `
-          <label style="display:flex;gap:12px;align-items:flex-start;
-            background:#F7F8FA;border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer">
-            <input type="checkbox" id="${id}"
-              style="width:20px;height:20px;flex-shrink:0;margin-top:1px;cursor:pointer;accent-color:#1A7A4A"/>
-            <span style="font-size:12px;color:#1C1C1C;line-height:1.6">${txt}</span>
-          </label>`).join("")}
+
+        <label style="display:flex;gap:12px;align-items:flex-start;
+          background:#F7F8FA;border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer">
+          <input type="checkbox" id="lgpd-c1"
+            style="width:20px;height:20px;flex-shrink:0;margin-top:1px;
+            cursor:pointer;accent-color:#1A7A4A"/>
+          <span style="font-size:12px;color:#1C1C1C;line-height:1.6">
+            Entendo que este app coletará minha
+            <strong>localização GPS e fotos</strong>
+            durante os check-ins de campo.
+          </span>
+        </label>
+
+        <label style="display:flex;gap:12px;align-items:flex-start;
+          background:#F7F8FA;border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer">
+          <input type="checkbox" id="lgpd-c2"
+            style="width:20px;height:20px;flex-shrink:0;margin-top:1px;
+            cursor:pointer;accent-color:#1A7A4A"/>
+          <span style="font-size:12px;color:#1C1C1C;line-height:1.6">
+            Consinto com o uso dos meus dados pela
+            <strong>Campanha David Almeida 2026</strong>
+            exclusivamente para controle de atividades eleitorais.
+          </span>
+        </label>
+
+        <label style="display:flex;gap:12px;align-items:flex-start;
+          background:#F7F8FA;border-radius:8px;padding:12px;cursor:pointer">
+          <input type="checkbox" id="lgpd-c3"
+            style="width:20px;height:20px;flex-shrink:0;margin-top:1px;
+            cursor:pointer;accent-color:#1A7A4A"/>
+          <span style="font-size:12px;color:#1C1C1C;line-height:1.6">
+            Sei que posso <strong>revogar este consentimento</strong>
+            a qualquer momento solicitando ao responsável jurídico da campanha.
+          </span>
+        </label>
       </div>
 
       <!-- Erro -->
@@ -767,42 +818,51 @@ if (document.readyState === "loading") {
         ⚠️ Marque todas as caixas acima para continuar.
       </div>
 
-      <!-- Data e hora do aceite -->
-      <div style="font-size:10px;color:#718096;text-align:center;margin-bottom:14px">
-        Ao aceitar, registramos data, hora e dispositivo como prova de consentimento.<br/>
+      <!-- Data/hora do aceite -->
+      <div style="font-size:10px;color:#718096;text-align:center;margin-bottom:14px;line-height:1.6">
+        Ao aceitar, registramos data, hora e dispositivo como prova de consentimento.<br>
         <strong id="lgpd-ts"></strong>
       </div>
 
-      <!-- Botões -->
+      <!-- Botão aceitar -->
       <button onclick="aceitarLGPD()" style="
         background:#1A7A4A;color:#fff;border:none;border-radius:12px;
         padding:16px;font-size:15px;font-weight:700;cursor:pointer;
-        width:100%;margin-bottom:10px;letter-spacing:.3px">
+        width:100%;margin-bottom:10px;letter-spacing:.3px;
+        font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif">
         ✅ Li e aceito os termos
       </button>
+
+      <!-- Botão recusar -->
       <button onclick="recusarLGPD()" style="
-        background:transparent;color:#718096;border:0.5px solid #E2E8F0;
-        border-radius:12px;padding:13px;font-size:13px;cursor:pointer;width:100%">
+        background:transparent;color:#718096;
+        border:0.5px solid #E2E8F0;border-radius:12px;
+        padding:13px;font-size:13px;cursor:pointer;width:100%;
+        font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif">
         Não aceito — não quero usar o app
       </button>
 
-      <p style="font-size:10px;color:#718096;text-align:center;margin-top:12px;line-height:1.6">
-        Em caso de dúvidas sobre seus dados, contate o responsável jurídico:<br/>
+      <p style="font-size:10px;color:#718096;text-align:center;
+        margin-top:14px;line-height:1.6">
+        Dúvidas sobre seus dados:<br>
         <strong>Dr. Paulo Lima — paulo@juridico.com</strong>
       </p>
     </div>
 
     <!-- Tela de recusa -->
-    <div id="lgpd-recusa" style="display:none;padding:32px 16px;text-align:center">
-      <div style="font-size:40px;margin-bottom:12px">🔒</div>
-      <h3 style="color:#2D3748;margin-bottom:10px">Consentimento não concedido</h3>
-      <p style="font-size:13px;color:#718096;line-height:1.6;margin-bottom:20px">
-        Sem o consentimento de coleta de dados, não é possível usar o app de check-in,
-        pois ele requer localização GPS e foto para comprovar presença em campo.<br/><br/>
+    <div id="lgpd-recusa" style="display:none;padding:36px 16px;text-align:center;
+      font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif">
+      <div style="font-size:48px;margin-bottom:14px">🔒</div>
+      <h3 style="color:#2D3748;margin-bottom:10px;font-size:16px">
+        Consentimento não concedido
+      </h3>
+      <p style="font-size:13px;color:#718096;line-height:1.7;margin-bottom:20px">
+        Sem o consentimento, não é possível usar o app de check-in,
+        pois ele requer localização GPS e foto para comprovar presença em campo.<br><br>
         Se mudar de ideia, feche e abra o app novamente.
       </p>
       <p style="font-size:11px;color:#718096">
-        Para dúvidas: <strong>Dr. Paulo Lima — paulo@juridico.com</strong>
+        Contato: <strong>Dr. Paulo Lima — paulo@juridico.com</strong>
       </p>
     </div>
 
@@ -810,9 +870,8 @@ if (document.readyState === "loading") {
 </div>
 
 <script>
-// Preenche data/hora atual no termo
 document.getElementById("lgpd-ts").textContent =
-  new Date().toLocaleString("pt-BR", {
+  new Date().toLocaleString("pt-BR",{
     day:"2-digit",month:"2-digit",year:"numeric",
     hour:"2-digit",minute:"2-digit",second:"2-digit"
   });
