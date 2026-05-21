@@ -345,7 +345,7 @@ function salvar() {
   localStorage.setItem("eleitores_campanha", JSON.stringify(eleitores));
 
   // Envia ao Sheets via iframe (método mais confiável — sem bloqueio CORS)
-  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzK0Gaehzj1bsqE-6UyXtUJlamHW-b8Lqgc33hKw6ipC97G7ZJ0VAeX18cAO1k9lkQtNg/exec";
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtKap6hL2EDCNQFuaJrhJBEoJdVqE4MieHJTpZ9IHpRgW17Q/exec";
   try {
     const params = new URLSearchParams();
     params.append("nome",      eleitor.nome      || "");
