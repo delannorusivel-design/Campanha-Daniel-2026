@@ -43,7 +43,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
 .int-btn{padding:10px 8px;border-radius:8px;border:0.5px solid var(--border);
   background:#fff;cursor:pointer;font-size:12px;font-weight:500;
   color:var(--muted);text-align:center;transition:all .15s}
-.int-btn.sel{border-color:var(--blue);background:var(--lblue);color:var(--blue)}
+.int-btn.sel{border-color:#1B4F8A!important;background:#D6EAF8!important;color:#1B4F8A!important;font-weight:700!important}
 
 .consent-box{background:var(--lgreen);border:0.5px solid #5DCAA5;
   border-radius:10px;padding:14px;margin-bottom:12px}
@@ -344,15 +344,49 @@ function salvar() {
   eleitores.push(eleitor);
   localStorage.setItem("eleitores_campanha", JSON.stringify(eleitores));
 
-  // Envia ao Sheets via FormData (resolve CORS do Apps Script)
+  // Envia ao Sheets via iframe (método mais confiável — sem bloqueio CORS)
   const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzK0Gaehzj1bsqE-6UyXtUJlamHW-b8Lqgc33hKw6ipC97G7ZJ0VAeX18cAO1k9lkQtNg/exec";
-  const form = new FormData();
-  form.append("dados", JSON.stringify(eleitor));
-  fetch(WEBHOOK_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: form
-  }).catch(()=>{});
+  try {
+    const params = new URLSearchParams();
+    params.append("nome",      eleitor.nome      || "");
+    params.append("whats",     eleitor.whats     || "");
+    params.append("zona",      eleitor.zona      || "");
+    params.append("ativista",  eleitor.ativista  || "");
+    params.append("bairro",    eleitor.bairro    || "");
+    params.append("idade",     eleitor.idade     || "");
+    params.append("interesse", eleitor.interesse || "");
+    params.append("obs",       eleitor.obs       || "");
+    params.append("dia",       eleitor.dia       || "");
+    params.append("hora",      eleitor.hora      || "");
+    params.append("id",        String(eleitor.id || ""));
+    params.append("consentimento", "SIM");
+
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.name = "hidden_iframe_" + Date.now();
+    document.body.appendChild(iframe);
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = WEBHOOK_URL;
+    form.target = iframe.name;
+    form.style.display = "none";
+
+    for (const [k, v] of params.entries()) {
+      const inp = document.createElement("input");
+      inp.type = "hidden"; inp.name = k; inp.value = v;
+      form.appendChild(inp);
+    }
+    document.body.appendChild(form);
+    form.submit();
+
+    setTimeout(() => {
+      document.body.removeChild(form);
+      document.body.removeChild(iframe);
+    }, 5000);
+  } catch(err) {
+    console.log("Envio sheets:", err);
+  }
 
   atualizarContadores();
   showFb("ok", `✅ ${eNome} cadastrado(a)! WhatsApp: ${eWhats}`);
