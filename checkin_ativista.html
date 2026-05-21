@@ -588,9 +588,16 @@ function showFb(type, msg) {
 
 // ── LGPD — CONSENTIMENTO ────────────────────────────
 function verificarConsentimento() {
-  const consent = localStorage.getItem("lgpd_consent");
-  if (!consent) {
-    document.getElementById("lgpd-modal").classList.add("open");
+  // Usa sessionStorage para garantir que aparece a cada sessão nova
+  // e localStorage para registro permanente do aceite
+  const aceito = localStorage.getItem("lgpd_consent");
+  const modal  = document.getElementById("lgpd-modal");
+  if (!modal) { iniciarApp(); return; }
+  if (!aceito) {
+    modal.style.cssText = "display:flex!important;flex-direction:column;" +
+      "justify-content:flex-end;position:fixed;inset:0;" +
+      "background:rgba(0,0,0,.85);z-index:99999;" +
+      "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
     document.body.style.overflow = "hidden";
   } else {
     iniciarApp();
@@ -615,7 +622,7 @@ function aceitarLGPD() {
     ]
   };
   localStorage.setItem("lgpd_consent", JSON.stringify(registro));
-  document.getElementById("lgpd-modal").classList.remove("open");
+  document.getElementById("lgpd-modal").style.display = "none";
   document.body.style.overflow = "";
   iniciarApp();
 }
@@ -634,7 +641,12 @@ function iniciarApp() {
 }
 
 // ── INIT ────────────────────────────────────────────
-verificarConsentimento();
+// Garante que o DOM está completamente carregado antes de rodar
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", verificarConsentimento);
+} else {
+  verificarConsentimento();
+}
 </script>
 
 <!-- ══ MODAL LGPD ══════════════════════════════════ -->
