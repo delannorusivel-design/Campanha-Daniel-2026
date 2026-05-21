@@ -345,8 +345,8 @@ function salvar() {
   localStorage.setItem("eleitores_campanha", JSON.stringify(eleitores));
 
   // Envia ao Sheets se configurado
-  const webhook = localStorage.getItem("sheets_webhook_eleitores");
-  if (webhook) {
+  localStorage.setItem("sheets_webhook_eleitores", "https://script.google.com/macros/s/AKfycbzK0Gaehzj1bsqE-6UyXtUJ1amHW-b8Lqgc33hKw6ipC97G7ZJ0VAeX18cAO1k91kQtNg/exec");
+const webhook = localStorage.getItem("sheets_webhook_eleitores");
     fetch(webhook, {
       method:"POST", mode:"no-cors",
       headers:{"Content-Type":"application/json"},
