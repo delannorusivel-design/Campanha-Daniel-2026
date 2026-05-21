@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#0D1F3C"/>
+<title>Cadastro de Eleitor — Campanha David Almeida 2026</title>
+<style>
+:root{
+  --navy:#0D1F3C;--blue:#1B4F8A;--lblue:#D6EAF8;
+  --green:#1A7A4A;--lgreen:#C8F0DC;
+  --amber:#856404;--lambr:#FFF3CD;
+  --red:#7B241C;--lred:#FDDCDC;
+  --border:#E2E8F0;--text:#1C1C1C;--muted:#718096;--lgray:#F7F8FA;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  background:#EEF2FF;color:var(--text);min-height:100vh;padding-bottom:30px}
+
+.header{background:var(--navy);padding:14px 16px;text-align:center;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header h1{font-size:15px;font-weight:700;color:#C8F0DC}
+.header p{font-size:11px;color:#5DCAA5;margin-top:2px}
+
+.content{padding:14px}
+.card{background:#fff;border-radius:12px;padding:14px;
+  margin-bottom:12px;border:0.5px solid var(--border)}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:block}
+.field{margin-bottom:10px}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
+.field input,.field select,.field textarea{
+  width:100%;border:0.5px solid var(--border);border-radius:9px;
+  padding:11px 12px;font-size:15px;outline:none;background:#fff;
+  -webkit-appearance:none;color:var(--text)}
+.field input:focus,.field select:focus{border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(27,79,138,.1)}
+.field textarea{resize:vertical;min-height:70px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.interesse-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px}
+.int-btn{padding:10px 8px;border-radius:8px;border:0.5px solid var(--border);
+  background:#fff;cursor:pointer;font-size:12px;font-weight:500;
+  color:var(--muted);text-align:center;transition:all .15s}
+.int-btn.sel{border-color:var(--blue);background:var(--lblue);color:var(--blue)}
+
+.consent-box{background:var(--lgreen);border:0.5px solid #5DCAA5;
+  border-radius:10px;padding:14px;margin-bottom:12px}
+.consent-title{font-size:12px;font-weight:700;color:var(--green);margin-bottom:10px}
+.consent-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.consent-item:last-child{margin-bottom:0}
+.consent-item input[type=checkbox]{
+  width:20px;height:20px;flex-shrink:0;margin-top:1px;
+  cursor:pointer;accent-color:var(--green)}
+.consent-item span{font-size:12px;color:#1C1C1C;line-height:1.55}
+
+.btn-send{background:var(--navy);color:#fff;border:none;border-radius:12px;
+  padding:16px;font-size:15px;font-weight:700;cursor:pointer;
+  width:100%;margin-bottom:8px;display:flex;align-items:center;
+  justify-content:center;gap:8px;transition:opacity .15s}
+.btn-send:active{opacity:.8}
+.btn-clear{background:transparent;color:var(--muted);
+  border:0.5px solid var(--border);border-radius:12px;
+  padding:12px;font-size:13px;cursor:pointer;width:100%}
+
+.fb{padding:12px 14px;border-radius:10px;font-size:13px;
+  margin-bottom:12px;font-weight:500;display:none}
+.fb.ok{display:block;background:var(--lgreen);color:var(--green);border:0.5px solid #5DCAA5}
+.fb.err{display:block;background:var(--lred);color:var(--red)}
+
+.contador{background:var(--navy);color:#C8F0DC;border-radius:10px;
+  padding:12px 16px;margin-bottom:12px;display:flex;
+  align-items:center;justify-content:space-between}
+.cnt-num{font-size:26px;font-weight:700;color:#5DCAA5}
+.cnt-lbl{font-size:11px;color:#8DB4E2;margin-top:2px}
+
+.lista-card{background:#fff;border-radius:10px;padding:10px 12px;
+  margin-bottom:8px;border:0.5px solid var(--border);
+  border-left:3px solid var(--blue)}
+.lista-nome{font-size:13px;font-weight:600}
+.lista-info{font-size:11px;color:var(--muted);margin-top:2px}
+.lista-tags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 7px;border-radius:8px;
+  background:var(--lblue);color:var(--blue)}
+.tag.green{background:var(--lgreen);color:var(--green)}
+
+.tabs{display:flex;gap:0;margin-bottom:14px;
+  background:#fff;border-radius:10px;padding:4px;border:0.5px solid var(--border)}
+.tab{flex:1;padding:8px;border:none;background:transparent;
+  border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;
+  color:var(--muted);transition:all .15s}
+.tab.active{background:var(--navy);color:#fff}
+
+.lgpd-aviso{background:var(--lambr);border-radius:8px;
+  padding:10px 12px;font-size:11px;color:var(--amber);
+  margin-bottom:12px;line-height:1.6;border:0.5px solid #E2C97A}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🗳️ Cadastro de Eleitor</h1>
+  <p>Campanha David Almeida 2026</p>
+</div>
+
+<div class="content">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-form" onclick="setTab('form')">➕ Novo cadastro</button>
+    <button class="tab" id="tab-lista" onclick="setTab('lista')">📋 Cadastrados</button>
+  </div>
+
+  <!-- ── ABA FORMULÁRIO ── -->
+  <div id="panel-form">
+
+    <!-- Contador -->
+    <div class="contador">
+      <div>
+        <div class="cnt-num" id="cnt-hoje">0</div>
+        <div class="cnt-lbl">Cadastros hoje</div>
+      </div>
+      <div style="text-align:right">
+        <div class="cnt-num" id="cnt-total">0</div>
+        <div class="cnt-lbl">Total geral</div>
+      </div>
+    </div>
+
+    <!-- Feedback -->
+    <div id="fb" class="fb"></div>
+
+    <!-- Dados do ativista -->
+    <div class="card">
+      <span class="sec-lbl">Quem está cadastrando</span>
+      <div class="grid-2">
+        <div class="field">
+          <label>Seu nome *</label>
+          <input id="a-nome" placeholder="Ativista"/>
+        </div>
+        <div class="field">
+          <label>Zona *</label>
+          <select id="a-zona">
+            <option value="">Zona...</option>
+            <option>Zona Norte</option>
+            <option>Zona Sul</option>
+            <option>Centro</option>
+            <option>Zona Oeste</option>
+            <option>Zona Leste</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dados do eleitor -->
+    <div class="card">
+      <span class="sec-lbl">Dados do eleitor</span>
+      <div class="field">
+        <label>Nome completo *</label>
+        <input id="e-nome" placeholder="Nome do eleitor" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>WhatsApp *</label>
+        <input id="e-whats" type="tel" placeholder="(11) 99999-0000"
+          oninput="formatarTel(this)" autocomplete="off"/>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Bairro</label>
+          <input id="e-bairro" placeholder="Bairro"/>
+        </div>
+        <div class="field">
+          <label>Faixa etária</label>
+          <select id="e-idade">
+            <option value="">Selecionar</option>
+            <option>18-24 anos</option>
+            <option>25-34 anos</option>
+            <option>35-44 anos</option>
+            <option>45-59 anos</option>
+            <option>60+ anos</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Observação sobre o eleitor</label>
+        <textarea id="e-obs" placeholder="Ex: Muito receptivo, pediu mais informações sobre saúde"></textarea>
+      </div>
+    </div>
+
+    <!-- Interesse -->
+    <div class="card">
+      <span class="sec-lbl">Principal interesse do eleitor</span>
+      <div class="interesse-grid" id="int-grid">
+        <button class="int-btn" data-int="Saúde" onclick="selInt(this)">🏥 Saúde</button>
+        <button class="int-btn" data-int="Segurança" onclick="selInt(this)">🛡️ Segurança</button>
+        <button class="int-btn" data-int="Educação" onclick="selInt(this)">📚 Educação</button>
+        <button class="int-btn" data-int="Emprego" onclick="selInt(this)">💼 Emprego</button>
+        <button class="int-btn" data-int="Infraestrutura" onclick="selInt(this)">🏗️ Infraestrutura</button>
+        <button class="int-btn" data-int="Transporte" onclick="selInt(this)">🚌 Transporte</button>
+        <button class="int-btn" data-int="Moradia" onclick="selInt(this)">🏠 Moradia</button>
+        <button class="int-btn" data-int="Outro" onclick="selInt(this)">📝 Outro</button>
+      </div>
+    </div>
+
+    <!-- Consentimento LGPD -->
+    <div class="lgpd-aviso">
+      ⚠️ <strong>Atenção — LGPD:</strong> só cadastre o eleitor se ele concordar
+      explicitamente em receber contato pelo candidato David Almeida via WhatsApp.
+      Pergunte em voz alta antes de preencher.
+    </div>
+
+    <div class="consent-box">
+      <div class="consent-title">🔒 Consentimento do eleitor (obrigatório)</div>
+
+      <div class="consent-item">
+        <input type="checkbox" id="c1"/>
+        <span>O eleitor <strong>autorizou verbalmente</strong> o cadastro
+        do seu WhatsApp pela Campanha David Almeida 2026.</span>
+      </div>
+
+      <div class="consent-item">
+        <input type="checkbox" id="c2"/>
+        <span>O eleitor <strong>aceitou receber mensagens</strong> do candidato
+        David Almeida via WhatsApp sobre a campanha.</span>
+      </div>
+
+      <div class="consent-item">
+        <input type="checkbox" id="c3"/>
+        <span>O eleitor foi informado de que pode
+        <strong>solicitar a exclusão</strong> do seu contato a qualquer momento.</span>
+      </div>
+    </div>
+
+    <button class="btn-send" onclick="salvar()">
+      💾 Salvar cadastro
+    </button>
+    <button class="btn-clear" onclick="limpar()">Limpar formulário</button>
+
+  </div>
+
+  <!-- ── ABA LISTA ── -->
+  <div id="panel-lista" style="display:none">
+    <div class="contador" style="margin-bottom:12px">
+      <div>
+        <div class="cnt-num" id="cnt-lista">0</div>
+        <div class="cnt-lbl">Eleitores cadastrados</div>
+      </div>
+      <button onclick="exportarCSV()" style="background:var(--lgreen);
+        color:var(--green);border:none;border-radius:8px;
+        padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">
+        📥 Exportar CSV
+      </button>
+    </div>
+
+    <input id="search" placeholder="🔍 Buscar eleitor..."
+      style="width:100%;border:0.5px solid var(--border);border-radius:9px;
+      padding:10px 12px;font-size:14px;outline:none;background:#fff;
+      margin-bottom:10px;display:block"
+      oninput="renderLista()"/>
+
+    <div id="lista-container"></div>
+  </div>
+
+</div>
+
+<script>
+// ── DADOS ──────────────────────────────────────────
+let eleitores = JSON.parse(localStorage.getItem("eleitores_campanha") || "[]");
+let intSel = "";
+const hoje = new Date().toISOString().slice(0,10);
+
+// ── TABS ──────────────────────────────────────────
+function setTab(id) {
+  document.getElementById("panel-form").style.display  = id==="form"  ? "block" : "none";
+  document.getElementById("panel-lista").style.display = id==="lista" ? "block" : "none";
+  document.getElementById("tab-form").classList.toggle("active",  id==="form");
+  document.getElementById("tab-lista").classList.toggle("active", id==="lista");
+  if (id==="lista") renderLista();
+}
+
+// ── INTERESSE ──────────────────────────────────────
+function selInt(btn) {
+  document.querySelectorAll(".int-btn").forEach(b => b.classList.remove("sel"));
+  btn.classList.add("sel");
+  intSel = btn.dataset.int;
+}
+
+// ── FORMATAR TELEFONE ──────────────────────────────
+function formatarTel(inp) {
+  let v = inp.value.replace(/\D/g,"");
+  if (v.length > 11) v = v.slice(0,11);
+  if (v.length > 6)
+    v = "("+v.slice(0,2)+") "+v.slice(2,7)+"-"+v.slice(7);
+  else if (v.length > 2)
+    v = "("+v.slice(0,2)+") "+v.slice(2);
+  inp.value = v;
+}
+
+// ── SALVAR ─────────────────────────────────────────
+function salvar() {
+  const aNome  = document.getElementById("a-nome").value.trim();
+  const aZona  = document.getElementById("a-zona").value;
+  const eNome  = document.getElementById("e-nome").value.trim();
+  const eWhats = document.getElementById("e-whats").value.trim();
+  const fb     = document.getElementById("fb");
+
+  if (!aNome || !aZona) {
+    showFb("err","Preencha seu nome e zona antes de cadastrar.");return;
+  }
+  if (!eNome || !eWhats) {
+    showFb("err","Nome e WhatsApp do eleitor são obrigatórios.");return;
+  }
+  if (eWhats.replace(/\D/g,"").length < 10) {
+    showFb("err","WhatsApp inválido — verifique o número.");return;
+  }
+  if (![document.getElementById("c1"),
+        document.getElementById("c2"),
+        document.getElementById("c3")].every(c=>c.checked)) {
+    showFb("err","Confirme os 3 itens de consentimento do eleitor antes de salvar.");return;
+  }
+
+  // Verifica duplicata
+  const tel = eWhats.replace(/\D/g,"");
+  if (eleitores.some(e => e.whats.replace(/\D/g,"") === tel)) {
+    showFb("err","⚠️ Este WhatsApp já está cadastrado!");return;
+  }
+
+  const eleitor = {
+    id:         Date.now(),
+    dia:        hoje,
+    hora:       new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
+    ativista:   aNome,
+    zona:       aZona,
+    nome:       eNome,
+    whats:      eWhats,
+    bairro:     document.getElementById("e-bairro").value.trim(),
+    idade:      document.getElementById("e-idade").value,
+    interesse:  intSel,
+    obs:        document.getElementById("e-obs").value.trim(),
+    consentimento: true,
+    status:     "Novo",
+  };
+
+  eleitores.push(eleitor);
+  localStorage.setItem("eleitores_campanha", JSON.stringify(eleitores));
+
+  // Envia ao Sheets se configurado
+  const webhook = localStorage.getItem("sheets_webhook_eleitores");
+  if (webhook) {
+    fetch(webhook, {
+      method:"POST", mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(eleitor)
+    }).catch(()=>{});
+  }
+
+  atualizarContadores();
+  showFb("ok", `✅ ${eNome} cadastrado(a)! WhatsApp: ${eWhats}`);
+  limpar();
+}
+
+// ── LIMPAR ─────────────────────────────────────────
+function limpar() {
+  ["e-nome","e-whats","e-bairro","e-obs"].forEach(id =>
+    document.getElementById(id).value = "");
+  document.getElementById("e-idade").value = "";
+  document.querySelectorAll(".int-btn").forEach(b => b.classList.remove("sel"));
+  document.querySelectorAll(".consent-box input").forEach(c => c.checked = false);
+  intSel = "";
+  // Mantém dados do ativista para facilitar
+}
+
+function showFb(type, msg) {
+  const el = document.getElementById("fb");
+  el.className = "fb " + type;
+  el.textContent = msg;
+  if (type==="ok") setTimeout(() => el.className="fb", 4000);
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+// ── CONTADORES ─────────────────────────────────────
+function atualizarContadores() {
+  const hojeCount = eleitores.filter(e => e.dia === hoje).length;
+  document.getElementById("cnt-hoje").textContent  = hojeCount;
+  document.getElementById("cnt-total").textContent = eleitores.length;
+  document.getElementById("cnt-lista").textContent = eleitores.length;
+}
+
+// ── LISTA ──────────────────────────────────────────
+function renderLista() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const lista = eleitores.filter(e =>
+    !q || e.nome.toLowerCase().includes(q) ||
+    e.whats.includes(q) || (e.bairro||"").toLowerCase().includes(q)
+  ).reverse();
+
+  const el = document.getElementById("lista-container");
+  if (!lista.length) {
+    el.innerHTML = `<div style="text-align:center;padding:32px;
+      color:var(--muted);font-size:13px">
+      Nenhum eleitor cadastrado ainda.</div>`;
+    return;
+  }
+
+  el.innerHTML = lista.map(e => `
+    <div class="lista-card">
+      <div class="lista-nome">👤 ${e.nome}</div>
+      <div class="lista-info">
+        📱 ${e.whats}
+        ${e.bairro ? " · 📍 "+e.bairro : ""}
+        · ⏰ ${e.hora}
+      </div>
+      <div class="lista-info">
+        Cadastrado por: ${e.ativista} (${e.zona})
+      </div>
+      <div class="lista-tags">
+        ${e.interesse ? `<span class="tag">${e.interesse}</span>` : ""}
+        ${e.idade ? `<span class="tag">${e.idade}</span>` : ""}
+        <span class="tag green">✅ Consentiu</span>
+      </div>
+      ${e.obs ? `<div style="font-size:11px;color:var(--muted);
+        margin-top:5px;font-style:italic">"${e.obs}"</div>` : ""}
+    </div>`).join("");
+
+  document.getElementById("cnt-lista").textContent = lista.length;
+}
+
+// ── EXPORTAR CSV ───────────────────────────────────
+function exportarCSV() {
+  if (!eleitores.length) {
+    alert("Nenhum eleitor para exportar.");return;
+  }
+  const header = ["ID","Data","Hora","Ativista","Zona","Nome","WhatsApp",
+    "Bairro","Faixa Etária","Interesse","Observação","Consentimento","Status"];
+  const rows = eleitores.map(e => [
+    e.id, e.dia, e.hora, e.ativista, e.zona, e.nome, e.whats,
+    e.bairro||"", e.idade||"", e.interesse||"", e.obs||"",
+    e.consentimento?"SIM":"NÃO", e.status||"Novo"
+  ]);
+  const csv = [header, ...rows]
+    .map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(","))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `eleitores_campanha_david_${hoje}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── INIT ──────────────────────────────────────────
+atualizarContadores();
+</script>
+</body>
+</html>
