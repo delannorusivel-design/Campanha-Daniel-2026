@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="theme-color" content="#0D1F3C"/>
+<title>Painel de Check-ins — Campanha Daniel Almeida 2026</title>
+<style>
+:root{
+  --navy:#0D1F3C;--blue:#1B4F8A;--lblue:#D6EAF8;
+  --green:#1A7A4A;--lgreen:#C8F0DC;
+  --amber:#856404;--lambr:#FFF3CD;
+  --red:#7B241C;--lred:#FDDCDC;
+  --purple:#4A235A;--lpurp:#EDE7F6;
+  --border:#E2E8F0;--text:#1C1C1C;--muted:#718096;--lgray:#F7F8FA;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  background:#EEF2FF;color:var(--text);min-height:100vh;padding-bottom:90px}
+
+.header{background:var(--navy);padding:14px 16px;position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:14px;font-weight:700;color:#C8F0DC}
+.header p{font-size:10px;color:#5DCAA5;margin-top:1px}
+.live-badge{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);
+  padding:4px 10px;border-radius:20px;font-size:10px;color:#C8F0DC}
+.dot{width:6px;height:6px;border-radius:50%;background:#5DCAA5;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.content{padding:12px 12px 16px}
+.panel{display:none}.panel.active{display:block}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;
+  border-top:0.5px solid var(--border);display:flex;z-index:100;
+  padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;padding:10px 4px 8px;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:10px;font-weight:500;color:var(--muted)}
+.nav-btn.active{color:var(--blue)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.card{background:#fff;border-radius:12px;padding:13px;
+  margin-bottom:10px;border:0.5px solid var(--border)}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:block}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:#fff;border-radius:10px;padding:12px;text-align:center;border:0.5px solid var(--border)}
+.kpi-v{font-size:26px;font-weight:700;line-height:1.2}
+.kpi-l{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Zona tabs */
+.zona-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;
+  margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.zona-tabs::-webkit-scrollbar{display:none}
+.ztab{flex-shrink:0;padding:6px 14px;border-radius:20px;border:0.5px solid var(--border);
+  background:#fff;cursor:pointer;font-size:12px;font-weight:500;
+  color:var(--muted);transition:all .15s}
+.ztab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* Check-in cards */
+.checkin-card{background:#fff;border-radius:12px;padding:12px;
+  margin-bottom:8px;border:0.5px solid var(--border)}
+.ci-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.ci-nome{font-size:13px;font-weight:600}
+.ci-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.ci-hora{font-size:11px;color:var(--muted);text-align:right}
+.ci-tipo{font-size:10px;padding:2px 8px;border-radius:8px;
+  background:var(--lblue);color:var(--blue);font-weight:500;margin-top:4px;display:inline-block}
+.ci-foto{width:100%;border-radius:8px;object-fit:cover;max-height:200px;
+  margin:8px 0;cursor:pointer;transition:opacity .15s}
+.ci-foto:hover{opacity:.9}
+.ci-gps{font-size:11px;color:var(--blue);display:flex;align-items:center;gap:5px;margin-top:6px}
+.ci-gps a{color:var(--blue);text-decoration:none}
+.ci-mapa{width:100%;height:140px;border-radius:8px;border:none;margin-top:6px}
+.ci-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:8px;margin-top:4px}
+.badge-ok{background:var(--lgreen);color:var(--green)}
+.badge-warn{background:var(--lambr);color:var(--amber)}
+.badge-err{background:var(--lred);color:var(--red)}
+
+/* Mapa geral */
+.mapa-wrap{background:#fff;border-radius:12px;overflow:hidden;
+  margin-bottom:12px;border:0.5px solid var(--border)}
+.mapa-header{padding:10px 14px;background:var(--navy);color:#C8F0DC;
+  font-size:12px;font-weight:600}
+#mapa-geral{width:100%;height:320px;border:none}
+
+/* Ativistas */
+.ativista-row{display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:0.5px solid var(--border)}
+.ativista-row:last-child{border-bottom:none}
+.av{width:38px;height:38px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:13px;
+  font-weight:700;flex-shrink:0}
+.at-nome{font-size:13px;font-weight:500}
+.at-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.at-cnt{font-size:20px;font-weight:700;margin-left:auto;flex-shrink:0}
+
+/* Timeline */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;
+  width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-dot{position:absolute;left:-24px;top:3px;width:12px;height:12px;
+  border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px var(--border)}
+.tl-hora{font-size:10px;color:var(--muted);margin-bottom:2px}
+.tl-txt{font-size:12px;font-weight:500}
+.tl-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* Foto modal */
+.foto-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);
+  z-index:300;display:none;align-items:center;justify-content:center;padding:16px}
+.foto-modal.open{display:flex}
+.foto-modal img{max-width:100%;max-height:90vh;border-radius:8px}
+.foto-modal-close{position:absolute;top:16px;right:16px;background:none;
+  border:none;color:#fff;font-size:28px;cursor:pointer}
+
+/* Alerta banner */
+.alerta-banner{background:var(--lred);border:0.5px solid #F09595;
+  border-radius:10px;padding:10px 13px;margin-bottom:10px;
+  display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--red)}
+.alerta-banner strong{font-weight:600}
+
+/* Search */
+.search-inp{width:100%;border:0.5px solid var(--border);border-radius:9px;
+  padding:10px 12px;font-size:14px;outline:none;background:#fff;
+  margin-bottom:10px;display:block}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🔍 Painel de Check-ins</h1>
+    <p>Campanha Daniel Almeida 2026 · articulador</p>
+  </div>
+  <div class="live-badge"><span class="dot"></span><span id="hora-lbl">--:--</span></div>
+</div>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dash">
+
+    <!-- Alertas -->
+    <div id="alertas-wrap"></div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-v" id="k-total" style="color:var(--blue)">0</div><div class="kpi-l">Check-ins hoje</div></div>
+      <div class="kpi"><div class="kpi-v" id="k-ativos" style="color:var(--green)">0</div><div class="kpi-l">Ativistas ativos</div></div>
+      <div class="kpi"><div class="kpi-v" id="k-eleit" style="color:var(--amber)">0</div><div class="kpi-l">Eleitores abordados</div></div>
+      <div class="kpi"><div class="kpi-v" id="k-fotos" style="color:var(--purple)">0</div><div class="kpi-l">Fotos enviadas</div></div>
+    </div>
+
+    <!-- Zona tabs -->
+    <span class="sec-lbl">Por zona</span>
+    <div class="zona-tabs" id="zona-tabs"></div>
+
+    <!-- Check-ins list -->
+    <div id="checkins-list"></div>
+
+  </div>
+
+  <!-- MAPA -->
+  <div class="panel" id="panel-mapa">
+    <div class="mapa-wrap">
+      <div class="mapa-header">📍 Localização dos check-ins de hoje</div>
+      <iframe id="mapa-geral" src="about:blank" title="Mapa de check-ins"></iframe>
+    </div>
+    <div class="card">
+      <span class="sec-lbl">Links do Google Maps por check-in</span>
+      <div id="mapa-lista"></div>
+    </div>
+  </div>
+
+  <!-- ATIVISTAS -->
+  <div class="panel" id="panel-atv">
+    <input class="search-inp" id="search-atv" placeholder="🔍 Buscar ativista..." oninput="renderAtivistas()"/>
+    <div class="card" id="atv-list"></div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="panel" id="panel-timeline">
+    <div class="card">
+      <span class="sec-lbl">Timeline do dia — todos os check-ins</span>
+      <div class="timeline" id="timeline-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-dash" onclick="setTab('dash')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Check-ins
+  </button>
+  <button class="nav-btn" id="nav-mapa" onclick="setTab('mapa')">
+    <svg viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+    Mapa
+  </button>
+  <button class="nav-btn" id="nav-atv" onclick="setTab('atv')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Ativistas
+  </button>
+  <button class="nav-btn" id="nav-timeline" onclick="setTab('timeline')">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Timeline
+  </button>
+</nav>
+
+<!-- FOTO MODAL -->
+<div class="foto-modal" id="foto-modal" onclick="fecharFoto()">
+  <button class="foto-modal-close" onclick="fecharFoto()">✕</button>
+  <img id="foto-modal-img" src="" alt="Check-in foto"/>
+</div>
+
+<script>
+// ── DADOS DE EXEMPLO ──────────────────────────────────
+// Em produção, isso viria do Google Sheets via Apps Script
+const hoje = new Date().toISOString().slice(0,10);
+const ZCORS = {
+  "Zona Norte":"#1B4F8A","Zona Sul":"#1A7A4A",
+  "Centro":"#4A235A","Zona Oeste":"#856404","Zona Leste":"#7B241C"
+};
+
+// Simula check-ins recebidos (em produção vêm do Sheets)
+const CHECKINS_DEMO = [
+  {id:1,dia:hoje,hora:"08:14",ts:"2026-04-29T08:14:00",nome:"João Pereira",zona:"Zona Norte",lider:"Carlos Menezes",tipo:"Visita domiciliar",eleit:8,obs:"Boa receptividade na Rua das Flores",lat:"-23.4880",lng:"-46.6290",acc:12,maps_url:"https://maps.google.com/?q=-23.4880,-46.6290",foto:null},
+  {id:2,dia:hoje,hora:"09:31",ts:"2026-04-29T09:31:00",nome:"Maria Santos",zona:"Zona Sul",lider:"Ana Rodrigues",tipo:"Distribuição de material",eleit:15,obs:"",lat:"-23.5830",lng:"-46.6350",acc:8,maps_url:"https://maps.google.com/?q=-23.5830,-46.6350",foto:null},
+  {id:3,dia:hoje,hora:"10:02",ts:"2026-04-29T10:02:00",nome:"João Pereira",zona:"Zona Norte",lider:"Carlos Menezes",tipo:"Abordagem de rua",eleit:22,obs:"Praça central — alto movimento",lat:"-23.4920",lng:"-46.6310",acc:15,maps_url:"https://maps.google.com/?q=-23.4920,-46.6310",foto:null},
+  {id:4,dia:hoje,hora:"10:45",ts:"2026-04-29T10:45:00",nome:"Carlos Lima",zona:"Zona Leste",lider:"Roberto Almeida",tipo:"Visita domiciliar",eleit:5,obs:"",lat:"-23.5390",lng:"-46.5010",acc:20,maps_url:"https://maps.google.com/?q=-23.5390,-46.5010",foto:null},
+  {id:5,dia:hoje,hora:"11:18",ts:"2026-04-29T11:18:00",nome:"Ana Ferreira",zona:"Centro",lider:"João da Silva",tipo:"Reunião com liderança",eleit:0,obs:"Reunião com Assoc. Comercial — positiva",lat:"-23.5480",lng:"-46.6360",acc:10,maps_url:"https://maps.google.com/?q=-23.5480,-46.6360",foto:null},
+  {id:6,dia:hoje,hora:"12:30",ts:"2026-04-29T12:30:00",nome:"Maria Santos",zona:"Zona Sul",lider:"Ana Rodrigues",tipo:"Abordagem de rua",eleit:18,obs:"",lat:"-23.5860",lng:"-46.6320",acc:11,maps_url:"https://maps.google.com/?q=-23.5860,-46.6320",foto:null},
+  {id:7,dia:hoje,hora:"13:45",ts:"2026-04-29T13:45:00",nome:"Paulo Mendes",zona:"Zona Oeste",lider:"Maria Conceição",tipo:"Distribuição de material",eleit:12,obs:"Faltando panfleto — pediu reposição",lat:"-23.5320",lng:"-46.7010",acc:9,maps_url:"https://maps.google.com/?q=-23.5320,-46.7010",foto:null},
+];
+
+// Carrega check-ins reais do localStorage (do app do ativista na mesma origem)
+function carregarCheckins() {
+  const locais = JSON.parse(localStorage.getItem("checkins_hoje") || "[]")
+    .filter(c => c.dia === hoje);
+  const todos = [...CHECKINS_DEMO, ...locais];
+  return todos.sort((a,b) => b.hora.localeCompare(a.hora));
+}
+
+let zonaFiltro = "Todas";
+
+// ── TABS ──────────────────────────────────────────────
+function setTab(id) {
+  ["dash","mapa","atv","timeline"].forEach(t => {
+    document.getElementById("panel-"+t).classList.toggle("active",t===id);
+    document.getElementById("nav-"+t).classList.toggle("active",t===id);
+  });
+  if (id==="mapa") renderMapa();
+  if (id==="atv")  renderAtivistas();
+  if (id==="timeline") renderTimeline();
+}
+
+// ── RELÓGIO ──────────────────────────────────────────
+setInterval(() => {
+  document.getElementById("hora-lbl").textContent =
+    new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+}, 1000);
+
+// ── DASHBOARD ────────────────────────────────────────
+function renderDash() {
+  const checkins = carregarCheckins();
+  const semFiltro = checkins;
+  const comFiltro = zonaFiltro === "Todas" ? semFiltro : semFiltro.filter(c=>c.zona===zonaFiltro);
+
+  // KPIs
+  const ativos = new Set(semFiltro.map(c=>c.nome)).size;
+  const eleit  = semFiltro.reduce((a,c)=>a+(c.eleit||0),0);
+  const fotos  = semFiltro.filter(c=>c.foto&&c.foto!=="[foto_local]").length;
+  document.getElementById("k-total").textContent  = semFiltro.length;
+  document.getElementById("k-ativos").textContent = ativos;
+  document.getElementById("k-eleit").textContent  = eleit;
+  document.getElementById("k-fotos").textContent  = fotos;
+
+  // Alertas: ativistas sem check-in há mais de 2h
+  const alertas = [];
+  const agora = new Date();
+  const nomes = [...new Set(semFiltro.map(c=>c.nome))];
+  nomes.forEach(nome => {
+    const ultimo = semFiltro.filter(c=>c.nome===nome).sort((a,b)=>b.hora.localeCompare(a.hora))[0];
+    if (ultimo) {
+      const [h,m] = ultimo.hora.split(":").map(Number);
+      const diff = (agora.getHours()*60+agora.getMinutes()) - (h*60+m);
+      if (diff > 90) alertas.push({nome, zona:ultimo.zona, diff: Math.round(diff/60*10)/10});
+    }
+  });
+  document.getElementById("alertas-wrap").innerHTML = alertas.map(a =>
+    `<div class="alerta-banner">⚠️ <div><strong>${a.nome}</strong> (${a.zona}) — sem check-in há ${a.diff}h. Verifique!</div></div>`
+  ).join("");
+
+  // Zona tabs
+  const zonas = ["Todas",...new Set(semFiltro.map(c=>c.zona))];
+  document.getElementById("zona-tabs").innerHTML = zonas.map(z =>
+    `<button class="ztab ${z===zonaFiltro?"active":""}" onclick="filtrarZona('${z}')">${z} ${z==="Todas"?semFiltro.length:(semFiltro.filter(c=>c.zona===z).length)}</button>`
+  ).join("");
+
+  // Check-ins
+  document.getElementById("checkins-list").innerHTML = comFiltro.length === 0
+    ? `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Nenhum check-in nesta zona.</div>`
+    : comFiltro.map(c => renderCheckin(c)).join("");
+}
+
+function renderCheckin(c) {
+  const cor  = ZCORS[c.zona] || "#888";
+  const temFoto = c.foto && c.foto !== "[foto_local]";
+  return `<div class="checkin-card" style="border-left:3px solid ${cor}">
+    <div class="ci-header">
+      <div>
+        <div class="ci-nome">👤 ${c.nome}</div>
+        <div class="ci-sub">📍 ${c.zona} · ${c.lider||"—"}</div>
+        <span class="ci-tipo">${c.tipo}</span>
+      </div>
+      <div class="ci-hora">
+        ⏰ ${c.hora}
+        ${c.eleit>0?`<br/><span style="color:var(--green);font-weight:600">${c.eleit} eleit.</span>`:""}
+      </div>
+    </div>
+    ${temFoto
+      ? `<img class="ci-foto" src="${c.foto}" alt="foto check-in" onclick="abrirFoto('${c.foto}')"/>`
+      : `<div style="background:var(--lgray);border-radius:8px;padding:20px;text-align:center;
+           font-size:12px;color:var(--muted);margin:8px 0">📷 Foto salva no dispositivo</div>`}
+    <div class="ci-gps">
+      📍 <a href="${c.maps_url}" target="_blank">
+        ${c.lat}, ${c.lng} (±${c.acc}m) — Ver no Maps
+      </a>
+    </div>
+    ${c.obs?`<div style="font-size:11px;color:var(--muted);margin-top:6px;
+      background:var(--lgray);border-radius:6px;padding:5px 8px">💬 ${c.obs}</div>`:""}
+  </div>`;
+}
+
+function filtrarZona(zona) {
+  zonaFiltro = zona;
+  renderDash();
+}
+
+// ── MAPA ─────────────────────────────────────────────
+function renderMapa() {
+  const checkins = carregarCheckins();
+  if (!checkins.length) return;
+
+  // Centra no primeiro ponto
+  const lat0 = checkins[0].lat;
+  const lng0 = checkins[0].lng;
+
+  const markers = checkins.map((c,i) => {
+    const cor = encodeURIComponent(ZCORS[c.zona]||"#1B4F8A");
+    return `${c.lat},${c.lng}`;
+  }).join("|");
+
+  // Usa OpenStreetMap via iframe
+  const pontos = checkins.map(c =>
+    `<li style="margin-bottom:8px;font-size:12px">
+      <strong>${c.hora}</strong> · ${c.nome} · ${c.zona}<br/>
+      <a href="${c.maps_url}" target="_blank" style="color:var(--blue);font-size:11px">
+        📍 ${c.lat}, ${c.lng} — Abrir no Maps
+      </a>
+    </li>`
+  ).join("");
+
+  document.getElementById("mapa-lista").innerHTML = `<ul style="padding-left:16px">${pontos}</ul>`;
+
+  // Link para ver todos no Google Maps
+  const allPoints = checkins.map(c=>`${c.lat},${c.lng}`).join("/");
+  document.getElementById("mapa-geral").src =
+    `https://maps.google.com/maps?q=${lat0},${lng0}&z=13&output=embed`;
+}
+
+// ── ATIVISTAS ────────────────────────────────────────
+function renderAtivistas() {
+  const checkins = carregarCheckins();
+  const q = document.getElementById("search-atv")?.value.toLowerCase() || "";
+  const por_nome = {};
+  checkins.forEach(c => {
+    if (!por_nome[c.nome]) por_nome[c.nome] = {nome:c.nome,zona:c.zona,lider:c.lider||"",checkins:[],eleit:0};
+    por_nome[c.nome].checkins.push(c);
+    por_nome[c.nome].eleit += c.eleit||0;
+  });
+
+  const lista = Object.values(por_nome)
+    .filter(a => !q || a.nome.toLowerCase().includes(q))
+    .sort((a,b) => b.checkins.length - a.checkins.length);
+
+  const max = Math.max(...lista.map(a=>a.checkins.length),1);
+
+  document.getElementById("atv-list").innerHTML = lista.length === 0
+    ? `<div style="text-align:center;padding:24px;color:var(--muted)">Nenhum ativista encontrado.</div>`
+    : lista.map(a => {
+        const ini = a.nome.split(" ").slice(0,2).map(p=>p[0]).join("").toUpperCase();
+        const cor = ZCORS[a.zona] || "#888";
+        const ultimo = a.checkins.sort((x,y)=>y.hora.localeCompare(x.hora))[0];
+        const pct = Math.round(a.checkins.length/max*100);
+        return `<div class="ativista-row">
+          <div class="av" style="background:${cor}22;color:${cor}">${ini}</div>
+          <div style="flex:1;min-width:0">
+            <div class="at-nome">${a.nome}</div>
+            <div class="at-sub">📍 ${a.zona} · último: ${ultimo.hora}</div>
+            <div style="margin-top:5px;height:4px;background:var(--border);border-radius:2px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:${cor};border-radius:2px"></div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">
+              ${a.eleit} eleitores abordados
+            </div>
+          </div>
+          <div class="at-cnt" style="color:${cor}">${a.checkins.length}</div>
+        </div>`;
+      }).join("");
+}
+
+// ── TIMELINE ─────────────────────────────────────────
+function renderTimeline() {
+  const checkins = carregarCheckins().slice().reverse();
+  const cores_tipo = {
+    "Visita domiciliar":"#1B4F8A",
+    "Abordagem de rua":"#1A7A4A",
+    "Distribuição de material":"#856404",
+    "Evento ou ação":"#4A235A",
+    "Reunião com liderança":"#7B241C",
+    "Outro":"#718096",
+  };
+  document.getElementById("timeline-list").innerHTML = checkins.map(c => {
+    const cor = cores_tipo[c.tipo] || "#888";
+    return `<div class="tl-item">
+      <div class="tl-dot" style="background:${cor}"></div>
+      <div class="tl-hora">⏰ ${c.hora}</div>
+      <div class="tl-txt">${c.nome} · ${c.tipo}</div>
+      <div class="tl-sub">📍 ${c.zona}${c.eleit?` · ${c.eleit} eleitores`:""}</div>
+      ${c.obs?`<div style="font-size:10px;color:var(--muted);margin-top:2px">💬 ${c.obs}</div>`:""}
+    </div>`;
+  }).join("");
+}
+
+// ── FOTO MODAL ───────────────────────────────────────
+function abrirFoto(src) {
+  document.getElementById("foto-modal-img").src = src;
+  document.getElementById("foto-modal").classList.add("open");
+}
+function fecharFoto() {
+  document.getElementById("foto-modal").classList.remove("open");
+}
+
+// ── INIT ─────────────────────────────────────────────
+document.getElementById("hora-lbl").textContent =
+  new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+renderDash();
+
+// Atualiza a cada 30 segundos
+setInterval(renderDash, 30000);
+</script>
+</body>
+</html>

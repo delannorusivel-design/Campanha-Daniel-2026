@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0D1F3C"/>
+<title>Check-in — Campanha Daniel Almeida 2026</title>
+<style>
+:root{
+  --navy:#0D1F3C;--blue:#1B4F8A;--lblue:#D6EAF8;
+  --green:#1A7A4A;--lgreen:#C8F0DC;
+  --amber:#856404;--lambr:#FFF3CD;
+  --red:#7B241C;--lred:#FDDCDC;
+  --border:#E2E8F0;--text:#1C1C1C;--muted:#718096;--lgray:#F7F8FA;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  background:#EEF2FF;color:var(--text);min-height:100vh;
+  padding-bottom:env(safe-area-inset-bottom)}
+
+.header{background:var(--navy);padding:14px 16px 12px;
+  text-align:center;position:sticky;top:0;z-index:100}
+.header h1{font-size:15px;font-weight:700;color:#C8F0DC;letter-spacing:.3px}
+.header p{font-size:11px;color:#5DCAA5;margin-top:2px}
+.hora-badge{display:inline-block;background:rgba(255,255,255,.12);
+  color:#C8F0DC;font-size:13px;font-weight:600;padding:4px 14px;
+  border-radius:20px;margin-top:6px;letter-spacing:.5px}
+
+.content{padding:14px 14px 100px}
+
+/* ── PERFIL ── */
+.perfil-card{background:#fff;border-radius:14px;padding:14px;
+  margin-bottom:12px;border:0.5px solid var(--border);
+  display:flex;align-items:center;gap:12px}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--lblue);
+  color:var(--blue);font-size:16px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.perfil-nome{font-size:14px;font-weight:600}
+.perfil-zona{font-size:11px;color:var(--muted);margin-top:2px}
+.perfil-status{font-size:10px;margin-top:4px}
+.btn-change{background:none;border:0.5px solid var(--border);
+  border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;
+  color:var(--muted);margin-left:auto;flex-shrink:0}
+
+/* ── SETUP ── */
+.setup-card{background:#fff;border-radius:14px;padding:16px;
+  margin-bottom:12px;border:0.5px solid var(--border)}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:block}
+.field{margin-bottom:10px}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}
+.field input,.field select{width:100%;border:0.5px solid var(--border);
+  border-radius:9px;padding:11px 12px;font-size:15px;outline:none;
+  background:#fff;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(27,79,138,.1)}
+
+/* ── CHECKIN PRINCIPAL ── */
+.checkin-card{background:#fff;border-radius:16px;padding:16px;
+  margin-bottom:12px;border:0.5px solid var(--border)}
+
+/* Camera */
+.camera-wrap{position:relative;background:#1C1C1C;border-radius:12px;
+  overflow:hidden;aspect-ratio:4/3;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:center}
+#video{width:100%;height:100%;object-fit:cover;display:block}
+#canvas{display:none}
+.camera-overlay{position:absolute;inset:0;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;text-align:center;padding:16px}
+.camera-icon{font-size:48px;margin-bottom:8px}
+.camera-txt{font-size:13px;opacity:.8}
+#foto-preview{width:100%;border-radius:12px;display:none;aspect-ratio:4/3;object-fit:cover}
+.foto-info{position:absolute;bottom:8px;left:8px;right:8px;
+  background:rgba(0,0,0,.6);border-radius:8px;padding:6px 10px;
+  font-size:10px;color:#fff;display:none}
+
+/* GPS */
+.gps-row{display:flex;align-items:center;gap:8px;padding:10px 12px;
+  background:var(--lgray);border-radius:10px;margin-bottom:12px;font-size:12px}
+.gps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.gps-dot.ok{background:var(--green)}.gps-dot.loading{background:var(--amber);animation:pulse 1s infinite}
+.gps-dot.err{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Tipo de ação */
+.tipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.tipo-btn{padding:10px 6px;border-radius:10px;border:0.5px solid var(--border);
+  background:#fff;cursor:pointer;font-size:11px;font-weight:500;
+  color:var(--muted);text-align:center;transition:all .15s;
+  display:flex;flex-direction:column;align-items:center;gap:3px}
+.tipo-btn .ti{font-size:20px}
+.tipo-btn.sel{border-color:var(--blue);background:var(--lblue);color:var(--blue)}
+
+/* Botões de ação */
+.btn-cam{background:var(--navy);color:#fff;border:none;border-radius:12px;
+  padding:14px;font-size:15px;font-weight:600;cursor:pointer;
+  width:100%;margin-bottom:8px;display:flex;align-items:center;
+  justify-content:center;gap:8px;transition:opacity .15s}
+.btn-cam:active{opacity:.8}
+.btn-cam.secondary{background:var(--lgray);color:var(--text);border:0.5px solid var(--border)}
+.btn-send{background:#1A7A4A;color:#fff;border:none;border-radius:12px;
+  padding:16px;font-size:16px;font-weight:700;cursor:pointer;
+  width:100%;margin-bottom:8px;display:flex;align-items:center;
+  justify-content:center;gap:8px;letter-spacing:.3px;transition:all .2s}
+.btn-send:disabled{opacity:.4;cursor:not-allowed}
+.btn-send:active{transform:scale(.98)}
+
+/* Feedback */
+.fb{padding:12px 14px;border-radius:10px;font-size:13px;
+  margin-bottom:10px;display:none;font-weight:500}
+.fb.ok{display:block;background:var(--lgreen);color:var(--green);border:0.5px solid #5DCAA5}
+.fb.err{display:block;background:var(--lred);color:var(--red)}
+.fb.loading{display:block;background:var(--lambr);color:var(--amber)}
+
+/* Histórico */
+.historico{margin-top:16px}
+.hist-item{background:#fff;border-radius:12px;padding:11px 13px;
+  margin-bottom:8px;border:0.5px solid var(--border);
+  display:flex;gap:10px;align-items:flex-start}
+.hist-thumb{width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.hist-thumb-placeholder{width:56px;height:56px;border-radius:8px;
+  background:var(--lgray);display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0}
+.hist-info{flex:1;min-width:0}
+.hist-tipo{font-size:12px;font-weight:600}
+.hist-hora{font-size:10px;color:var(--muted);margin-top:1px}
+.hist-loc{font-size:10px;color:var(--blue);margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-badge{font-size:9px;padding:2px 7px;border-radius:8px;
+  display:inline-block;margin-top:4px}
+.badge-green{background:var(--lgreen);color:var(--green)}
+.badge-blue{background:var(--lblue);color:var(--blue)}
+.badge-amber{background:var(--lambr);color:var(--amber)}
+
+/* Contador de check-ins */
+.counter-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.counter{background:#fff;border-radius:10px;padding:10px;
+  text-align:center;border:0.5px solid var(--border)}
+.counter-n{font-size:22px;font-weight:700}
+.counter-l{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+
+/* Modal de perfil */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:200;display:none;align-items:flex-end}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 32px;
+  width:100%;max-height:80vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--navy)}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📍 Check-in de Campo</h1>
+  <p>Campanha Daniel Almeida 2026</p>
+  <div class="hora-badge" id="hora-badge">--:--:--</div>
+</div>
+
+<div class="content">
+
+  <!-- PERFIL -->
+  <div class="perfil-card" id="perfil-card">
+    <div class="avatar" id="av-initials">?</div>
+    <div>
+      <div class="perfil-nome" id="perfil-nome">Configure seu perfil</div>
+      <div class="perfil-zona" id="perfil-zona">Toque para configurar</div>
+      <div class="perfil-status" id="perfil-status"></div>
+    </div>
+    <button class="btn-change" onclick="abrirModal()">✏️ Editar</button>
+  </div>
+
+  <!-- CONTADORES -->
+  <div class="counter-row" id="counter-row">
+    <div class="counter">
+      <div class="counter-n" id="cnt-total" style="color:var(--blue)">0</div>
+      <div class="counter-l">Check-ins hoje</div>
+    </div>
+    <div class="counter">
+      <div class="counter-n" id="cnt-campo" style="color:var(--green)">0</div>
+      <div class="counter-l">Em campo</div>
+    </div>
+    <div class="counter">
+      <div class="counter-n" id="cnt-eleit" style="color:var(--amber)">0</div>
+      <div class="counter-l">Eleitores</div>
+    </div>
+  </div>
+
+  <!-- FEEDBACK -->
+  <div class="fb" id="fb"></div>
+
+  <!-- CHECK-IN CARD -->
+  <div class="checkin-card">
+    <span class="sec-lbl">Novo check-in</span>
+
+    <!-- Camera -->
+    <div class="camera-wrap" id="camera-wrap">
+      <video id="video" autoplay playsinline muted></video>
+      <div class="camera-overlay" id="cam-overlay">
+        <div class="camera-icon">📷</div>
+        <div class="camera-txt">Toque para ativar a câmera</div>
+      </div>
+      <img id="foto-preview" alt="Foto capturada"/>
+      <div class="foto-info" id="foto-info"></div>
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <!-- GPS -->
+    <div class="gps-row" id="gps-row">
+      <div class="gps-dot loading" id="gps-dot"></div>
+      <span id="gps-txt">Aguardando localização GPS...</span>
+    </div>
+
+    <!-- Tipo de ação -->
+    <span class="sec-lbl">Tipo de atividade</span>
+    <div class="tipo-grid">
+      <button class="tipo-btn sel" data-tipo="Visita domiciliar" onclick="selTipo(this)">
+        <span class="ti">🏠</span>Visita
+      </button>
+      <button class="tipo-btn" data-tipo="Abordagem de rua" onclick="selTipo(this)">
+        <span class="ti">🗣️</span>Abordagem
+      </button>
+      <button class="tipo-btn" data-tipo="Distribuição de material" onclick="selTipo(this)">
+        <span class="ti">📦</span>Material
+      </button>
+      <button class="tipo-btn" data-tipo="Evento ou ação" onclick="selTipo(this)">
+        <span class="ti">🎤</span>Evento
+      </button>
+      <button class="tipo-btn" data-tipo="Reunião com liderança" onclick="selTipo(this)">
+        <span class="ti">🤝</span>Reunião
+      </button>
+      <button class="tipo-btn" data-tipo="Outro" onclick="selTipo(this)">
+        <span class="ti">📝</span>Outro
+      </button>
+    </div>
+
+    <!-- Eleitores abordados -->
+    <div class="field">
+      <label>Eleitores abordados nesta atividade</label>
+      <input id="f-eleit" type="number" min="0" placeholder="0"/>
+    </div>
+
+    <!-- Descrição rápida -->
+    <div class="field">
+      <label>Observação rápida (opcional)</label>
+      <input id="f-obs" placeholder="Ex: Boa receptividade no bairro"/>
+    </div>
+
+    <!-- Botões -->
+    <button class="btn-cam" id="btn-cam" onclick="toggleCamera()">
+      📷 Ativar câmera
+    </button>
+    <button class="btn-cam secondary" id="btn-retake" onclick="retake()" style="display:none">
+      🔄 Tirar outra foto
+    </button>
+    <button class="btn-send" id="btn-send" onclick="enviarCheckin()">
+      ✅ Enviar check-in
+    </button>
+  </div>
+
+  <!-- HISTÓRICO DO DIA -->
+  <div class="historico">
+    <span class="sec-lbl">Meus check-ins de hoje</span>
+    <div id="historico-list">
+      <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">
+        Nenhum check-in ainda hoje.<br/>Faça o primeiro registro!
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- MODAL PERFIL -->
+<div class="modal-bg" id="modal-bg" onclick="fecharModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="fecharModal()">✕</button>
+    <h2>👤 Seu perfil</h2>
+    <div class="field"><label>Nome completo *</label>
+      <input id="m-nome" placeholder="Ex: João Pereira"/></div>
+    <div class="field"><label>Zona eleitoral *</label>
+      <select id="m-zona">
+        <option value="">Selecionar...</option>
+        <option>Zona Norte</option><option>Zona Sul</option>
+        <option>Centro</option><option>Zona Oeste</option><option>Zona Leste</option>
+      </select></div>
+    <div class="field"><label>Líder responsável</label>
+      <input id="m-lider" placeholder="Ex: Carlos Menezes"/></div>
+    <button class="btn-send" onclick="salvarPerfil()" style="margin-top:8px">
+      💾 Salvar perfil
+    </button>
+  </div>
+</div>
+
+<script>
+// ── ESTADO ──────────────────────────────────────────
+let perfil   = JSON.parse(localStorage.getItem("perfil_ativista") || "null");
+let checkins = JSON.parse(localStorage.getItem("checkins_hoje") || "[]");
+let gpsData  = null;
+let streamV  = null;
+let fotoBase64 = null;
+let tipoSel  = "Visita domiciliar";
+let camAtiva = false;
+
+// Limpa checkins se for outro dia
+const hoje = new Date().toISOString().slice(0,10);
+if (checkins.length && checkins[0]?.dia !== hoje) {
+  checkins = [];
+  localStorage.setItem("checkins_hoje", JSON.stringify(checkins));
+}
+
+// ── RELÓGIO ─────────────────────────────────────────
+function atualizarHora() {
+  const now = new Date();
+  document.getElementById("hora-badge").textContent =
+    now.toLocaleTimeString("pt-BR", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+}
+setInterval(atualizarHora, 1000);
+atualizarHora();
+
+// ── GPS ─────────────────────────────────────────────
+function iniciarGPS() {
+  if (!navigator.geolocation) {
+    setGPS("err", "GPS não disponível neste dispositivo");
+    return;
+  }
+  navigator.geolocation.watchPosition(
+    pos => {
+      gpsData = {
+        lat: pos.coords.latitude.toFixed(6),
+        lng: pos.coords.longitude.toFixed(6),
+        acc: Math.round(pos.coords.accuracy),
+      };
+      setGPS("ok", `📍 ${gpsData.lat}, ${gpsData.lng} (±${gpsData.acc}m)`);
+    },
+    err => {
+      setGPS("err", "Localização bloqueada — habilite o GPS");
+      gpsData = null;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+  );
+}
+
+function setGPS(status, txt) {
+  const dot = document.getElementById("gps-dot");
+  dot.className = "gps-dot " + status;
+  document.getElementById("gps-txt").textContent = txt;
+}
+
+// ── CÂMERA ──────────────────────────────────────────
+async function toggleCamera() {
+  if (camAtiva) { tirarFoto(); return; }
+  try {
+    streamV = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:960} },
+      audio: false
+    });
+    const video = document.getElementById("video");
+    video.srcObject = streamV;
+    document.getElementById("cam-overlay").style.display = "none";
+    document.getElementById("foto-preview").style.display = "none";
+    document.getElementById("btn-cam").innerHTML = "📸 Tirar foto";
+    camAtiva = true;
+  } catch(e) {
+    showFb("err", "Câmera não permitida. Verifique as permissões do navegador.");
+  }
+}
+
+function tirarFoto() {
+  const video  = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  canvas.width  = video.videoWidth  || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext("2d");
+
+  // Espelhar se câmera frontal
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // Carimbo GPS + hora
+  const now = new Date().toLocaleString("pt-BR");
+  const gpsStr = gpsData ? `GPS: ${gpsData.lat}, ${gpsData.lng}` : "GPS: sem sinal";
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.font = "bold 14px Arial";
+  ctx.fillText(`${now}  |  ${gpsStr}`, 10, canvas.height - 16);
+
+  // Watermark campanha
+  ctx.font = "bold 12px Arial";
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  ctx.fillText("Campanha Daniel Almeida 2026", 10, 20);
+
+  fotoBase64 = canvas.toDataURL("image/jpeg", 0.8);
+
+  // Mostra preview
+  const prev = document.getElementById("foto-preview");
+  prev.src = fotoBase64;
+  prev.style.display = "block";
+  document.getElementById("video").style.display = "none";
+  document.getElementById("foto-info").textContent =
+    `📍 ${gpsData ? gpsData.lat+", "+gpsData.lng : "sem GPS"}  ·  ${new Date().toLocaleTimeString("pt-BR")}`;
+  document.getElementById("foto-info").style.display = "block";
+
+  // Para stream
+  if (streamV) streamV.getTracks().forEach(t => t.stop());
+  camAtiva = false;
+  document.getElementById("btn-cam").style.display = "none";
+  document.getElementById("btn-retake").style.display = "block";
+}
+
+function retake() {
+  fotoBase64 = null;
+  document.getElementById("foto-preview").style.display = "none";
+  document.getElementById("foto-info").style.display = "none";
+  document.getElementById("video").style.display = "block";
+  document.getElementById("btn-cam").style.display = "block";
+  document.getElementById("btn-cam").innerHTML = "📷 Ativar câmera";
+  document.getElementById("btn-retake").style.display = "none";
+  document.getElementById("cam-overlay").style.display = "flex";
+  camAtiva = false;
+}
+
+// ── TIPO DE AÇÃO ────────────────────────────────────
+function selTipo(btn) {
+  document.querySelectorAll(".tipo-btn").forEach(b => b.classList.remove("sel"));
+  btn.classList.add("sel");
+  tipoSel = btn.dataset.tipo;
+}
+
+// ── ENVIAR CHECK-IN ─────────────────────────────────
+async function enviarCheckin() {
+  if (!perfil?.nome) { showFb("err", "Configure seu perfil primeiro."); return; }
+  if (!fotoBase64)   { showFb("err", "Tire uma foto antes de enviar."); return; }
+  if (!gpsData)      { showFb("err", "Aguarde o GPS localizar você."); return; }
+
+  const btn = document.getElementById("btn-send");
+  btn.disabled = true;
+  btn.textContent = "⏳ Enviando...";
+  showFb("loading", "Enviando check-in... aguarde.");
+
+  const checkin = {
+    id:       Date.now(),
+    dia:      hoje,
+    hora:     new Date().toLocaleTimeString("pt-BR", {hour:"2-digit",minute:"2-digit"}),
+    ts:       new Date().toISOString(),
+    nome:     perfil.nome,
+    zona:     perfil.zona,
+    lider:    perfil.lider || "",
+    tipo:     tipoSel,
+    eleit:    parseInt(document.getElementById("f-eleit").value) || 0,
+    obs:      document.getElementById("f-obs").value.trim(),
+    lat:      gpsData.lat,
+    lng:      gpsData.lng,
+    acc:      gpsData.acc,
+    foto:     fotoBase64,
+    maps_url: `https://maps.google.com/?q=${gpsData.lat},${gpsData.lng}`,
+  };
+
+  // Salva local
+  checkins.push(checkin);
+  localStorage.setItem("checkins_hoje", JSON.stringify(checkins));
+
+  // Tenta enviar ao Google Sheets via Apps Script
+  const sheetsUrl = localStorage.getItem("sheets_webhook");
+  if (sheetsUrl) {
+    try {
+      // Envia sem a foto (foto fica no local por economia)
+      const payload = {...checkin, foto: "[foto_local]"};
+      await fetch(sheetsUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(payload),
+      });
+    } catch(e) { /* silencia erro de rede */ }
+  }
+
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = "✅ Enviar check-in";
+    showFb("ok", `✅ Check-in #${checkins.length} enviado! ${new Date().toLocaleTimeString("pt-BR")} · ${tipoSel}`);
+    atualizarContadores();
+    renderHistorico();
+    // Limpa campos
+    document.getElementById("f-eleit").value = "";
+    document.getElementById("f-obs").value   = "";
+    retake();
+  }, 1200);
+}
+
+// ── CONTADORES ──────────────────────────────────────
+function atualizarContadores() {
+  const hojeCheckins = checkins.filter(c => c.dia === hoje);
+  document.getElementById("cnt-total").textContent = hojeCheckins.length;
+  document.getElementById("cnt-campo").textContent =
+    hojeCheckins.filter(c => ["Visita domiciliar","Abordagem de rua"].includes(c.tipo)).length;
+  document.getElementById("cnt-eleit").textContent =
+    hojeCheckins.reduce((a,c) => a + (c.eleit||0), 0);
+}
+
+// ── HISTÓRICO ───────────────────────────────────────
+function renderHistorico() {
+  const el    = document.getElementById("historico-list");
+  const lista = checkins.filter(c => c.dia === hoje).reverse();
+  if (!lista.length) {
+    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">
+      Nenhum check-in ainda hoje.<br/>Faça o primeiro registro!</div>`;
+    return;
+  }
+  const badges = {
+    "Visita domiciliar":       ["🏠","badge-blue"],
+    "Abordagem de rua":        ["🗣️","badge-green"],
+    "Distribuição de material":["📦","badge-amber"],
+    "Evento ou ação":          ["🎤","badge-green"],
+    "Reunião com liderança":   ["🤝","badge-blue"],
+    "Outro":                   ["📝","badge-amber"],
+  };
+  el.innerHTML = lista.map(c => {
+    const [ico, cls] = badges[c.tipo] || ["📍","badge-blue"];
+    const thumb = c.foto && c.foto !== "[foto_local]"
+      ? `<img class="hist-thumb" src="${c.foto}" alt="foto"/>`
+      : `<div class="hist-thumb-placeholder">${ico}</div>`;
+    return `<div class="hist-item">
+      ${thumb}
+      <div class="hist-info">
+        <div class="hist-tipo">${ico} ${c.tipo}</div>
+        <div class="hist-hora">⏰ ${c.hora} · ${c.eleit ? c.eleit+" eleitores" : "sem contagem"}</div>
+        <div class="hist-loc">
+          <a href="${c.maps_url}" target="_blank" style="color:var(--blue);text-decoration:none">
+            📍 ${c.lat}, ${c.lng} (±${c.acc}m)
+          </a>
+        </div>
+        ${c.obs ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">${c.obs}</div>` : ""}
+        <span class="hist-badge ${cls}">${c.hora}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ── PERFIL ──────────────────────────────────────────
+function atualizarPerfil() {
+  if (!perfil) return;
+  const ini = perfil.nome.split(" ").slice(0,2).map(p=>p[0]).join("").toUpperCase();
+  document.getElementById("av-initials").textContent = ini;
+  document.getElementById("perfil-nome").textContent = perfil.nome;
+  document.getElementById("perfil-zona").textContent = "📍 " + perfil.zona + (perfil.lider ? " · 👤 " + perfil.lider : "");
+  const total = checkins.filter(c=>c.dia===hoje).length;
+  document.getElementById("perfil-status").innerHTML =
+    total > 0
+      ? `<span style="color:var(--green);font-size:10px">✅ ${total} check-in(s) hoje</span>`
+      : `<span style="color:var(--muted);font-size:10px">Nenhum check-in ainda</span>`;
+}
+
+function abrirModal() {
+  if (perfil) {
+    document.getElementById("m-nome").value  = perfil.nome  || "";
+    document.getElementById("m-zona").value  = perfil.zona  || "";
+    document.getElementById("m-lider").value = perfil.lider || "";
+  }
+  document.getElementById("modal-bg").classList.add("open");
+}
+
+function fecharModal(e) {
+  if (!e || e.target === document.getElementById("modal-bg"))
+    document.getElementById("modal-bg").classList.remove("open");
+}
+
+function salvarPerfil() {
+  const nome = document.getElementById("m-nome").value.trim();
+  const zona = document.getElementById("m-zona").value;
+  if (!nome || !zona) { alert("Nome e zona são obrigatórios."); return; }
+  perfil = { nome, zona, lider: document.getElementById("m-lider").value.trim() };
+  localStorage.setItem("perfil_ativista", JSON.stringify(perfil));
+  document.getElementById("modal-bg").classList.remove("open");
+  atualizarPerfil();
+  showFb("ok", `✅ Perfil de ${nome} configurado!`);
+}
+
+function showFb(type, msg) {
+  const el = document.getElementById("fb");
+  el.className = "fb " + type;
+  el.textContent = msg;
+  if (type === "ok") setTimeout(() => el.className = "fb", 4000);
+}
+
+// ── INIT ────────────────────────────────────────────
+iniciarGPS();
+if (!perfil) abrirModal();
+atualizarPerfil();
+atualizarContadores();
+renderHistorico();
+</script>
+</body>
+</html>

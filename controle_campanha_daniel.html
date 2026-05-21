@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="theme-color" content="#0D1F3C"/>
+<title>Controle — Campanha Daniel Almeida 2026</title>
+<style>
+:root{
+  --navy:#0D1F3C;--blue:#1B4F8A;--lblue:#D6EAF8;
+  --green:#1A7A4A;--lgreen:#C8F0DC;
+  --amber:#856404;--lambr:#FFF3CD;
+  --red:#7B241C;--lred:#FDDCDC;
+  --purple:#4A235A;--lpurp:#EDE7F6;
+  --gray:#2D3748;--lgray:#F7F8FA;
+  --border:#E2E8F0;--text:#1C1C1C;--muted:#718096;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  font-size:14px;color:var(--text);background:#EEF2FF;min-height:100vh}
+.header{background:var(--navy);padding:14px 16px;display:flex;
+  align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header h1{font-size:14px;font-weight:600;color:#C8F0DC}
+.header p{font-size:10px;color:#5DCAA5;margin-top:1px}
+.live{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);
+  padding:4px 10px;border-radius:20px;font-size:10px;color:#C8F0DC}
+.dot-pulse{width:6px;height:6px;border-radius:50%;background:#5DCAA5;
+  animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.content{padding:12px 12px 90px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;
+  border-top:0.5px solid var(--border);display:flex;z-index:100;
+  padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;padding:10px 4px 8px;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:10px;font-weight:500;color:var(--muted)}
+.nav-btn.active{color:var(--blue)}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;
+  border:0.5px solid var(--border)}
+.sec-lbl{font-size:10px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:block}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.kpi{background:#fff;border-radius:10px;padding:12px;text-align:center;border:0.5px solid var(--border)}
+.kpi-v{font-size:24px;font-weight:600;line-height:1.2}
+.kpi-l{font-size:10px;color:var(--muted);margin-top:2px}
+/* Zona cards */
+.zona-card{background:#fff;border-radius:12px;padding:12px 14px;
+  margin-bottom:8px;border:0.5px solid var(--border);
+  border-left:4px solid transparent}
+.zona-card.ok{border-left-color:#1A7A4A}
+.zona-card.warn{border-left-color:#856404}
+.zona-card.crit{border-left-color:#7B241C}
+.zona-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.zona-nome{font-size:13px;font-weight:600}
+.zona-lider{font-size:11px;color:var(--muted);margin-top:1px}
+.zona-pct{font-size:20px;font-weight:700}
+.bar-track{height:5px;background:var(--border);border-radius:3px;
+  overflow:hidden;margin-bottom:6px}
+.bar-fill{height:100%;border-radius:3px;transition:width .8s}
+.metricas{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.met{text-align:center;background:var(--lgray);border-radius:6px;padding:5px 3px}
+.met-v{font-size:12px;font-weight:600;color:var(--text)}
+.met-l{font-size:9px;color:var(--muted)}
+.status-badge{font-size:10px;padding:3px 8px;border-radius:10px;font-weight:500}
+.badge-ok{background:var(--lgreen);color:var(--green)}
+.badge-warn{background:var(--lambr);color:var(--amber)}
+.badge-crit{background:var(--lred);color:var(--red)}
+/* Links */
+.link-card{background:#fff;border-radius:12px;padding:12px 14px;
+  margin-bottom:8px;border:0.5px solid var(--border)}
+.link-zona{font-size:12px;font-weight:600;margin-bottom:4px}
+.link-lider{font-size:11px;color:var(--muted);margin-bottom:8px}
+.link-url{font-size:10px;color:var(--blue);word-break:break-all;
+  background:var(--lblue);padding:6px 8px;border-radius:6px;display:block;margin-bottom:8px}
+.btn-copy{background:var(--navy);color:#fff;border:none;border-radius:8px;
+  padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;width:100%}
+.btn-wa{background:#25D366;color:#fff;border:none;border-radius:8px;
+  padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;width:100%;margin-top:6px}
+/* Registro */
+.field{margin-bottom:10px}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;border:0.5px solid var(--border);
+  border-radius:8px;padding:10px 11px;font-size:14px;outline:none;background:#fff}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.chip{padding:8px;border-radius:8px;border:0.5px solid var(--border);
+  background:#fff;cursor:pointer;font-size:11px;color:var(--muted);
+  text-align:center;transition:all .15s}
+.chip.sel{border-color:var(--green);background:var(--lgreen);
+  color:var(--green);font-weight:500}
+.btn-p{background:var(--navy);color:#fff;border:none;border-radius:10px;
+  padding:13px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:4px}
+.fb{padding:10px 12px;border-radius:8px;font-size:12px;
+  margin-bottom:10px;display:none}
+.fb.ok{display:block;background:var(--lgreen);color:var(--green)}
+.fb.err{display:block;background:var(--lred);color:var(--red)}
+.preview-box{background:var(--lgray);border-radius:8px;padding:10px;
+  display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.preview-pct{font-size:28px;font-weight:700}
+.preview-pct.ok{color:var(--green)}.preview-pct.warn{color:var(--amber)}.preview-pct.crit{color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🗳️ Campanha Daniel Almeida 2026</h1>
+    <p>Sistema de controle — articulador político</p>
+  </div>
+  <div class="live"><span class="dot-pulse"></span>ao vivo</div>
+</div>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dash">
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-v" id="k-vis" style="color:var(--blue)">0</div><div class="kpi-l">Visitas totais</div></div>
+      <div class="kpi"><div class="kpi-v" id="k-ele" style="color:var(--green)">0</div><div class="kpi-l">Eleitores</div></div>
+      <div class="kpi"><div class="kpi-v" id="k-crit" style="color:var(--red)">0</div><div class="kpi-l">Zonas críticas</div></div>
+      <div class="kpi"><div class="kpi-v" id="k-reg" style="color:var(--muted)">0</div><div class="kpi-l">Registros hoje</div></div>
+    </div>
+    <span class="sec-lbl">Zonas eleitorais</span>
+    <div id="zona-cards"></div>
+    <button class="btn-p" style="margin-top:4px" onclick="simular()">🔄 Simular novo dia</button>
+  </div>
+
+  <!-- LINKS -->
+  <div class="panel" id="panel-links">
+    <div class="card" style="background:#EFF6FF;border-color:#1B4F8A">
+      <span class="sec-lbl">Como usar</span>
+      <p style="font-size:12px;color:#1B4F8A;line-height:1.6">
+        Cada zona tem um link próprio. Compartilhe com o líder via WhatsApp —
+        os ativistas preenchem pelo celular e os dados vão direto para a planilha Google Sheets.
+      </p>
+    </div>
+    <div id="links-container"></div>
+  </div>
+
+  <!-- REGISTRAR -->
+  <div class="panel" id="panel-reg">
+    <div id="fb-reg" class="fb"></div>
+    <div class="card">
+      <span class="sec-lbl">Dados do ativista</span>
+      <div class="field"><label>Nome do ativista *</label>
+        <input id="r-nome" placeholder="Ex: João Pereira"/></div>
+      <div class="grid-2">
+        <div class="field"><label>Data</label>
+          <input id="r-data" type="date"/></div>
+        <div class="field"><label>Zona *</label>
+          <select id="r-zona">
+            <option value="">Selecionar...</option>
+            <option>Zona Norte</option><option>Zona Sul</option>
+            <option>Centro</option><option>Zona Oeste</option><option>Zona Leste</option>
+          </select></div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="sec-lbl">Produção do dia</span>
+      <div class="grid-2">
+        <div class="field"><label>🏠 Visitas (meta: 20)</label>
+          <input id="r-vis" type="number" min="0" placeholder="0" oninput="atualizarPrev()"/></div>
+        <div class="field"><label>🗣️ Eleitores (meta: 50)</label>
+          <input id="r-ele" type="number" min="0" placeholder="0" oninput="atualizarPrev()"/></div>
+        <div class="field"><label>📦 Material (meta: 100)</label>
+          <input id="r-mat" type="number" min="0" placeholder="0" oninput="atualizarPrev()"/></div>
+        <div class="field"><label>🎤 Eventos (meta: 2)</label>
+          <input id="r-eve" type="number" min="0" placeholder="0" oninput="atualizarPrev()"/></div>
+        <div class="field"><label>📱 Contatos (meta: 15)</label>
+          <input id="r-con" type="number" min="0" placeholder="0" oninput="atualizarPrev()"/></div>
+        <div class="field"><label>⚠️ Gargalo</label>
+          <input id="r-garg" placeholder="Ex: faltou material"/></div>
+      </div>
+    </div>
+    <div class="preview-box">
+      <div class="preview-pct ok" id="prev-pct">0%</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="prev-status">Preencha os dados</div>
+        <div style="font-size:11px;color:var(--muted)">Média das 5 métricas vs meta</div>
+      </div>
+    </div>
+    <button class="btn-p" onclick="salvarReg()">💾 Salvar registro</button>
+  </div>
+
+</div>
+
+<!-- NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-dash" onclick="setTab('dash')">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </button>
+  <button class="nav-btn" id="nav-links" onclick="setTab('links')">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    Links
+  </button>
+  <button class="nav-btn" id="nav-reg" onclick="setTab('reg')">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    Registrar
+  </button>
+</nav>
+
+<script>
+const METAS={vis:20,ele:50,mat:100,eve:2,con:15};
+const ZCORS=["#1B4F8A","#1A7A4A","#4A235A","#856404","#7B241C"];
+
+// Links reais — substitua após rodar o Apps Script
+const LINKS=[
+  {zona:"Zona Norte",lider:"Carlos Menezes",url:"https://forms.gle/ZONA_NORTE_LINK"},
+  {zona:"Zona Sul",lider:"Ana Rodrigues",url:"https://forms.gle/ZONA_SUL_LINK"},
+  {zona:"Centro",lider:"João da Silva",url:"https://forms.gle/CENTRO_LINK"},
+  {zona:"Zona Oeste",lider:"Maria Conceição",url:"https://forms.gle/ZONA_OESTE_LINK"},
+  {zona:"Zona Leste",lider:"Roberto Almeida",url:"https://forms.gle/ZONA_LESTE_LINK"},
+];
+
+let zonas=[
+  {nome:"Zona Norte",lider:"Carlos M.",vis:55,ele:138,mat:270,eve:5,con:40,garg:""},
+  {nome:"Zona Sul",lider:"Ana R.",vis:68,ele:172,mat:345,eve:8,con:53,garg:""},
+  {nome:"Centro",lider:"João S.",vis:30,ele:70,mat:140,eve:3,con:18,garg:"Material insuficiente"},
+  {nome:"Zona Oeste",lider:"Maria C.",vis:44,ele:115,mat:230,eve:4,con:33,garg:""},
+  {nome:"Zona Leste",lider:"Roberto A.",vis:22,ele:52,mat:95,eve:2,con:14,garg:"Baixa mobilização"},
+];
+
+function pct(z){
+  return Math.round(([z.vis/60,z.ele/150,z.mat/300,z.eve/6,z.con/45].reduce((a,b)=>a+b,0)/5)*100);
+}
+function corZ(p){return p>=100?"#1A7A4A":p>=70?"#856404":"#7B241C"}
+function clsZ(p){return p>=70?"ok":p>=50?"warn":"crit"}
+function statusZ(p){return p>=100?"🏆 Excelente":p>=70?"✅ No plano":p>=50?"⚠️ Atenção":"🔴 Crítico"}
+
+function renderDash(){
+  const totalVis=zonas.reduce((a,z)=>a+z.vis,0);
+  const totalEle=zonas.reduce((a,z)=>a+z.ele,0);
+  const crits=zonas.filter(z=>pct(z)<50).length;
+  document.getElementById("k-vis").textContent=totalVis;
+  document.getElementById("k-ele").textContent=totalEle;
+  document.getElementById("k-crit").textContent=crits;
+  document.getElementById("k-reg").textContent=zonas.length;
+
+  document.getElementById("zona-cards").innerHTML=zonas.map((z,i)=>{
+    const p=pct(z),cor=corZ(p),cls=clsZ(p);
+    return `<div class="zona-card ${cls}">
+      <div class="zona-top">
+        <div>
+          <div class="zona-nome">${z.nome}</div>
+          <div class="zona-lider">👤 ${z.lider}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="zona-pct" style="color:${cor}">${p}%</div>
+          <span class="status-badge badge-${cls}">${statusZ(p)}</span>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(p,100)}%;background:${cor}"></div></div>
+      <div class="metricas">
+        <div class="met"><div class="met-v">${z.vis}</div><div class="met-l">Visitas</div></div>
+        <div class="met"><div class="met-v">${z.ele}</div><div class="met-l">Eleit.</div></div>
+        <div class="met"><div class="met-v">${z.mat}</div><div class="met-l">Material</div></div>
+        <div class="met"><div class="met-v">${z.eve}</div><div class="met-l">Eventos</div></div>
+        <div class="met"><div class="met-v">${z.con}</div><div class="met-l">Contatos</div></div>
+      </div>
+      ${z.garg?`<div style="margin-top:8px;background:var(--lambr);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--amber)">⚠️ ${z.garg}</div>`:""}
+    </div>`;
+  }).join("");
+}
+
+function renderLinks(){
+  document.getElementById("links-container").innerHTML=LINKS.map((l,i)=>`
+    <div class="link-card" style="border-left:4px solid ${ZCORS[i]}">
+      <div class="link-zona" style="color:${ZCORS[i]}">📍 ${l.zona}</div>
+      <div class="link-lider">👤 ${l.lider}</div>
+      <a class="link-url" href="${l.url}" target="_blank">${l.url}</a>
+      <button class="btn-copy" onclick="copiar('${l.url}',this)">📋 Copiar link</button>
+      <button class="btn-wa" onclick="enviarWA('${l.zona}','${l.lider}','${l.url}')">💬 Enviar via WhatsApp</button>
+    </div>`).join("");
+}
+
+function copiar(url,btn){
+  navigator.clipboard?.writeText(url).then(()=>{
+    btn.textContent="✅ Copiado!";
+    setTimeout(()=>btn.textContent="📋 Copiar link",2000);
+  });
+}
+
+function enviarWA(zona,lider,url){
+  const msg=encodeURIComponent(
+    `Oi ${lider}! 👋\n\nAqui está o link de registro diário para os ativistas da *${zona}*:\n\n${url}\n\nCompartilhe com a equipe — preenchimento pelo celular, rápido e simples.\n\nCampanha Daniel Almeida 2026 🗳️`
+  );
+  window.open(`https://wa.me/?text=${msg}`,"_blank");
+}
+
+function simular(){
+  zonas=zonas.map(z=>({
+    ...z,
+    vis:Math.max(5,z.vis+Math.round((Math.random()-.4)*15)),
+    ele:Math.max(10,z.ele+Math.round((Math.random()-.4)*30)),
+    mat:Math.max(20,z.mat+Math.round((Math.random()-.4)*50)),
+    eve:Math.max(0,z.eve+Math.round((Math.random()-.5)*3)),
+    con:Math.max(3,z.con+Math.round((Math.random()-.4)*10)),
+  }));
+  renderDash();
+}
+
+function atualizarPrev(){
+  const v=+document.getElementById("r-vis").value||0;
+  const e=+document.getElementById("r-ele").value||0;
+  const m=+document.getElementById("r-mat").value||0;
+  const ev=+document.getElementById("r-eve").value||0;
+  const c=+document.getElementById("r-con").value||0;
+  const p=Math.round(([v/METAS.vis,e/METAS.ele,m/METAS.mat,ev/METAS.eve,c/METAS.con].reduce((a,b)=>a+b,0)/5)*100);
+  const el=document.getElementById("prev-pct");
+  el.textContent=p+"%";
+  el.className="preview-pct "+(p>=70?"ok":p>=50?"warn":"crit");
+  document.getElementById("prev-status").textContent=
+    p>=100?"🏆 Acima da meta":p>=70?"✅ No plano":p>=50?"⚠️ Atenção":"🔴 Crítico";
+}
+
+function salvarReg(){
+  const nome=document.getElementById("r-nome").value.trim();
+  const zona=document.getElementById("r-zona").value;
+  const fb=document.getElementById("fb-reg");
+  if(!nome||!zona){fb.className="fb err";fb.textContent="Nome e zona são obrigatórios.";return;}
+  const idx=zonas.findIndex(z=>z.nome===zona);
+  if(idx>=0){
+    zonas[idx].vis+=+document.getElementById("r-vis").value||0;
+    zonas[idx].ele+=+document.getElementById("r-ele").value||0;
+    zonas[idx].mat+=+document.getElementById("r-mat").value||0;
+    zonas[idx].eve+=+document.getElementById("r-eve").value||0;
+    zonas[idx].con+=+document.getElementById("r-con").value||0;
+    zonas[idx].garg=document.getElementById("r-garg").value||"";
+  }
+  fb.className="fb ok";
+  fb.textContent=`✅ Registro de ${nome} (${zona}) salvo! Dashboard atualizado.`;
+  renderDash();
+  ["r-nome","r-vis","r-ele","r-mat","r-eve","r-con","r-garg"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("r-zona").value="";
+  document.getElementById("prev-pct").textContent="0%";
+  setTimeout(()=>fb.className="fb",3500);
+}
+
+function setTab(id){
+  ["dash","links","reg"].forEach(t=>{
+    document.getElementById("panel-"+t).classList.toggle("active",t===id);
+    document.getElementById("nav-"+t).classList.toggle("active",t===id);
+  });
+  if(id==="links") renderLinks();
+}
+
+// Init
+document.getElementById("r-data").value=new Date().toISOString().slice(0,10);
+renderDash();
+</script>
+</body>
+</html>
