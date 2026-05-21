@@ -344,46 +344,26 @@ function salvar() {
   eleitores.push(eleitor);
   localStorage.setItem("eleitores_campanha", JSON.stringify(eleitores));
 
-  // Envia ao Sheets via iframe (método mais confiável — sem bloqueio CORS)
+  // Envia ao Sheets via GET (método mais compatível com Apps Script)
   const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtKap6hL2EDCNQFuaJrhJBEoJdVqE4MieHJTpZ9IHpRgW17Q/exec";
   try {
-    const params = new URLSearchParams();
-    params.append("nome",      eleitor.nome      || "");
-    params.append("whats",     eleitor.whats     || "");
-    params.append("zona",      eleitor.zona      || "");
-    params.append("ativista",  eleitor.ativista  || "");
-    params.append("bairro",    eleitor.bairro    || "");
-    params.append("idade",     eleitor.idade     || "");
-    params.append("interesse", eleitor.interesse || "");
-    params.append("obs",       eleitor.obs       || "");
-    params.append("dia",       eleitor.dia       || "");
-    params.append("hora",      eleitor.hora      || "");
-    params.append("id",        String(eleitor.id || ""));
-    params.append("consentimento", "SIM");
-
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    iframe.name = "hidden_iframe_" + Date.now();
-    document.body.appendChild(iframe);
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = WEBHOOK_URL;
-    form.target = iframe.name;
-    form.style.display = "none";
-
-    for (const [k, v] of params.entries()) {
-      const inp = document.createElement("input");
-      inp.type = "hidden"; inp.name = k; inp.value = v;
-      form.appendChild(inp);
-    }
-    document.body.appendChild(form);
-    form.submit();
-
-    setTimeout(() => {
-      document.body.removeChild(form);
-      document.body.removeChild(iframe);
-    }, 5000);
+    const params = new URLSearchParams({
+      nome:         eleitor.nome      || "",
+      whats:        eleitor.whats     || "",
+      zona:         eleitor.zona      || "",
+      ativista:     eleitor.ativista  || "",
+      bairro:       eleitor.bairro    || "",
+      idade:        eleitor.idade     || "",
+      interesse:    eleitor.interesse || "",
+      obs:          eleitor.obs       || "",
+      dia:          eleitor.dia       || "",
+      hora:         eleitor.hora      || "",
+      id:           String(eleitor.id || Date.now()),
+      consentimento:"SIM"
+    });
+    const url = WEBHOOK_URL + "?" + params.toString();
+    const img = new Image();
+    img.src = url;
   } catch(err) {
     console.log("Envio sheets:", err);
   }
