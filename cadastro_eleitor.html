@@ -344,15 +344,13 @@ function salvar() {
   eleitores.push(eleitor);
   localStorage.setItem("eleitores_campanha", JSON.stringify(eleitores));
 
-  // Envia ao Sheets se configurado
-  localStorage.setItem("sheets_webhook_eleitores", "https://script.google.com/macros/s/AKfycbzK0Gaehzj1bsqE-6UyXtUJ1amHW-b8Lqgc33hKw6ipC97G7ZJ0VAeX18cAO1k91kQtNg/exec");
-const webhook = localStorage.getItem("sheets_webhook_eleitores");
-    fetch(webhook, {
-      method:"POST", mode:"no-cors",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(eleitor)
-    }).catch(()=>{});
-  }
+  // Envia ao Sheets — URL fixa
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzK0Gaehzj1bsqE-6UyXtUJlamHW-b8Lqgc33hKw6ipC97G7ZJ0VAeX18cAO1k9lkQtNg/exec";
+  fetch(WEBHOOK_URL, {
+    method:"POST", mode:"no-cors",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(eleitor)
+  }).catch(()=>{});
 
   atualizarContadores();
   showFb("ok", `✅ ${eNome} cadastrado(a)! WhatsApp: ${eWhats}`);
