@@ -225,6 +225,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
             <option>Outro</option><option>Prefiro não dizer</option>
           </select></div>
       </div>
+      <div class="field"><label>Intenção de voto *</label>
+        <div class="intencao-grid" id="intencao-grid">
+          <button class="int-btn" data-int="SIM" onclick="selIntencao(this)"
+            style="border-color:#1A7A4A;color:#1A7A4A">
+            ✅ SIM — vai votar
+          </button>
+          <button class="int-btn" data-int="TALVEZ" onclick="selIntencao(this)"
+            style="border-color:#856404;color:#856404">
+            🤔 TALVEZ — indeciso
+          </button>
+          <button class="int-btn" data-int="NAO" onclick="selIntencao(this)"
+            style="border-color:#7B241C;color:#7B241C">
+            ❌ NÃO — contrário
+          </button>
+          <button class="int-btn" data-int="NAO_SABE" onclick="selIntencao(this)"
+            style="border-color:#718096;color:#718096">
+            ❓ Não sabe ainda
+          </button>
+        </div>
+      </div>
       <div class="field"><label>Observação</label>
         <textarea id="e-obs"
           placeholder="Ex: Muito receptiva, quer saber sobre a defesa dos direitos das mulheres"></textarea>
@@ -310,7 +330,7 @@ const WH     = "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtK
 const HOJE   = new Date().toISOString().slice(0,10);
 
 let dados  = JSON.parse(localStorage.getItem(KEY)||"[]");
-let intSel = "", localT = "capital";
+let intSel = "", localT = "capital", intencaoSel = "";
 
 function setTab(id){
   document.getElementById("panel-form").style.display  = id==="form" ?"block":"none";
@@ -449,6 +469,7 @@ function renderLista(){
         ${e.interesse?'<span class="tag">'+e.interesse+'</span>':""}
         ${e.idade?'<span class="tag">'+e.idade+'</span>':""}
         ${e.genero?'<span class="tag">'+e.genero+'</span>':""}
+        ${{e.intencao_voto?'<span class="tag" style="background:'+(e.intencao_voto==="SIM"?"#C8F0DC;color:#1A7A4A":e.intencao_voto==="TALVEZ"?"#FFF3CD;color:#856404":e.intencao_voto==="NAO"?"#FDDCDC;color:#7B241C":"#F7F8FA;color:#718096")+'">'+({{"SIM":"✅ Vai votar","TALVEZ":"🤔 Indeciso","NAO":"❌ Contrário","NAO_SABE":"❓ Não sabe"}}[e.intencao_voto]||e.intencao_voto)+'</span>':""}}
         <span class="tag ok">✅ Consentiu</span>
       </div>
     </div>`).join("");
@@ -462,7 +483,7 @@ function exportCSV(){
   const rows=dados.map(e=>[
     e.id,e.dia,e.hora,e.candidato,e.cargo,e.numero,e.ativista,e.zona_atv||"",e.tipo_local||"",
     e.nome,e.whats,e.zona||"",e.bairro||"",e.municipio||"",e.distrito||"",e.localidade||"",
-    e.idade||"",e.genero||"",e.interesse||"",e.obs||"","SIM",e.status||"Novo"
+    e.idade||"",e.genero||"",e.interesse||"",e.intencao_voto||"",e.obs||"","SIM",e.status||"Novo"
   ]);
   const csv=[h,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
   const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
