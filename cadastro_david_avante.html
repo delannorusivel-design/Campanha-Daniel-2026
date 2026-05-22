@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#7D3C00"/>
+<title>Cadastro — David Almeida 70 · Avante 70</title>
+<style>
+:root{
+  --pri:#E87722;--esc:#7D3C00;--cl:#FEF0E6;
+  --border:#E2E8F0;--text:#1A1A1A;--muted:#718096;--lgray:#F7F8FA;
+  --amarelo:#F5C000;--laranja:#E87722;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  background:#F5F5F5;color:var(--text);min-height:100vh;padding-bottom:30px}
+
+/* HEADER */
+.header{background:var(--esc);padding:0;position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.35)}
+.header-top{padding:10px 14px;display:flex;align-items:center;gap:10px}
+.logo-circle{width:40px;height:40px;border-radius:50%;
+  background:#F5C000;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;color:#1A1A1A;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.header-info{flex:1}
+.header-nome{font-size:15px;font-weight:700;color:#fff;line-height:1.2}
+.header-cargo{font-size:10px;color:rgba(255,255,255,.75);margin-top:1px}
+.header-num{background:#F5C000;color:#1A1A1A;font-size:12px;
+  font-weight:900;padding:4px 12px;border-radius:20px;flex-shrink:0}
+.header-bar{height:4px;background:linear-gradient(90deg,#F5C000,#E87722)}
+
+.content{padding:14px}
+.card{background:#fff;border-radius:12px;padding:14px;
+  margin-bottom:12px;border:0.5px solid var(--border)}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:block}
+.field{margin-bottom:10px}
+.field label{font-size:11px;color:var(--muted);display:block;
+  margin-bottom:4px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;
+  border:0.5px solid var(--border);border-radius:9px;padding:11px 12px;
+  font-size:15px;outline:none;background:#fff;-webkit-appearance:none;color:var(--text)}
+.field input:focus,.field select:focus{border-color:var(--pri);
+  box-shadow:0 0 0 3px rgba(232,119,34,.15)}
+.field textarea{resize:vertical;min-height:60px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+.local-tipo{display:flex;gap:8px;margin-bottom:10px}
+.local-btn{flex:1;padding:10px 8px;border-radius:8px;
+  border:0.5px solid var(--border);background:#fff;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--muted);text-align:center}
+.local-btn.sel{border-color:var(--pri)!important;
+  background:var(--cl)!important;color:var(--esc)!important;font-weight:700!important}
+
+.int-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.int-btn{padding:10px 8px;border-radius:8px;border:0.5px solid var(--border);
+  background:#fff;cursor:pointer;font-size:12px;font-weight:500;
+  color:var(--muted);text-align:center;transition:all .15s}
+.int-btn.sel{border-color:var(--pri)!important;background:var(--cl)!important;
+  color:var(--esc)!important;font-weight:700!important}
+
+.consent-box{background:var(--cl);border:0.5px solid var(--pri);
+  border-radius:10px;padding:14px;margin-bottom:12px}
+.consent-title{font-size:12px;font-weight:700;color:var(--esc);margin-bottom:10px}
+.consent-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.consent-item:last-child{margin-bottom:0}
+.consent-item input[type=checkbox]{width:20px;height:20px;flex-shrink:0;
+  margin-top:1px;cursor:pointer;accent-color:var(--pri)}
+.consent-item span{font-size:12px;color:#1A1A1A;line-height:1.55}
+
+.btn-send{background:var(--pri);color:#fff;border:none;border-radius:12px;
+  padding:16px;font-size:15px;font-weight:700;cursor:pointer;
+  width:100%;margin-bottom:8px;display:flex;align-items:center;
+  justify-content:center;gap:8px}
+.btn-send:active{opacity:.8}
+.btn-clear{background:transparent;color:var(--muted);
+  border:0.5px solid var(--border);border-radius:12px;
+  padding:12px;font-size:13px;cursor:pointer;width:100%}
+
+.fb{padding:12px 14px;border-radius:10px;font-size:13px;
+  margin-bottom:12px;font-weight:500;display:none}
+.fb.ok{display:block;background:var(--cl);color:var(--esc);border:0.5px solid var(--pri)}
+.fb.err{display:block;background:#FDDCDC;color:#7B241C}
+
+.contador{background:var(--esc);color:#fff;border-radius:10px;
+  padding:12px 16px;margin-bottom:12px;display:flex;
+  align-items:center;justify-content:space-between}
+.cnt-n{font-size:26px;font-weight:700;color:#F5C000}
+.cnt-l{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
+
+.tabs{display:flex;gap:0;margin-bottom:14px;background:#fff;
+  border-radius:10px;padding:4px;border:0.5px solid var(--border)}
+.tab{flex:1;padding:8px;border:none;background:transparent;
+  border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;
+  color:var(--muted);transition:all .15s}
+.tab.active{background:var(--pri);color:#fff}
+
+.lista-card{background:#fff;border-radius:10px;padding:10px 12px;
+  margin-bottom:8px;border:0.5px solid var(--border);
+  border-left:3px solid var(--pri)}
+.tag{font-size:10px;padding:2px 7px;border-radius:8px;
+  background:var(--cl);color:var(--esc);display:inline-block;margin:2px 2px 0 0}
+.tag.ok{background:#C8F0DC;color:#1A7A4A}
+.lgpd-av{background:#FFF3CD;border-radius:8px;padding:10px 12px;
+  font-size:11px;color:#856404;margin-bottom:12px;line-height:1.6;
+  border:0.5px solid #E2C97A}
+
+/* Avante footer */
+.avante-footer{display:flex;align-items:center;justify-content:center;
+  gap:8px;padding:16px;opacity:.6}
+.avante-footer span{font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo-circle">70</div>
+    <div class="header-info">
+      <div class="header-nome">David Almeida</div>
+      <div class="header-cargo">Governador · Avante 70 · Amazonas</div>
+    </div>
+    <div class="header-num">Nº 70</div>
+  </div>
+  <div class="header-bar"></div>
+</div>
+
+<div class="content">
+
+  <div class="tabs">
+    <button class="tab active" id="tab-form" onclick="setTab('form')">➕ Novo cadastro</button>
+    <button class="tab" id="tab-lista" onclick="setTab('lista')">📋 Cadastrados</button>
+  </div>
+
+  <div id="panel-form">
+
+    <div class="contador">
+      <div><div class="cnt-n" id="cnt-hoje">0</div><div class="cnt-l">Hoje</div></div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:rgba(255,255,255,.8)">Governador</div>
+        <div style="font-size:10px;color:#F5C000;font-weight:700">Avante 70</div>
+      </div>
+      <div style="text-align:right">
+        <div class="cnt-n" id="cnt-total">0</div>
+        <div class="cnt-l">Total</div>
+      </div>
+    </div>
+
+    <div id="fb" class="fb"></div>
+
+    <!-- Ativista -->
+    <div class="card">
+      <span class="sec-lbl">Quem está cadastrando</span>
+      <div class="grid-2">
+        <div class="field"><label>Seu nome *</label>
+          <input id="a-nome" placeholder="Nome do ativista"/></div>
+        <div class="field"><label>Sua zona/área</label>
+          <select id="a-zona">
+            <option value="">Selecionar...</option>
+            <option>Zona Norte</option><option>Zona Sul</option>
+            <option>Centro</option><option>Zona Oeste</option>
+            <option>Zona Leste</option><option>Interior</option>
+          </select></div>
+      </div>
+    </div>
+
+    <!-- Localização -->
+    <div class="card">
+      <span class="sec-lbl">Onde o eleitor está</span>
+      <div class="local-tipo">
+        <button class="local-btn sel" data-local="capital" onclick="selLocal(this)">
+          🏙️ Capital (Manaus)
+        </button>
+        <button class="local-btn" data-local="interior" onclick="selLocal(this)">
+          🌿 Interior do AM
+        </button>
+      </div>
+      <div id="bloco-capital">
+        <div class="grid-2">
+          <div class="field"><label>Zona eleitoral</label>
+            <select id="c-zona">
+              <option value="">Selecionar...</option>
+              <option>Zona Norte</option><option>Zona Sul</option>
+              <option>Centro</option><option>Zona Oeste</option><option>Zona Leste</option>
+            </select></div>
+          <div class="field"><label>Bairro</label>
+            <input id="c-bairro" placeholder="Ex: Compensa"/></div>
+        </div>
+      </div>
+      <div id="bloco-interior" style="display:none">
+        <div class="grid-3">
+          <div class="field"><label>Município *</label>
+            <input id="i-municipio" placeholder="Ex: Itacoatiara"/></div>
+          <div class="field"><label>Distrito</label>
+            <input id="i-distrito" placeholder="Ex: Zona Rural"/></div>
+          <div class="field"><label>Localidade</label>
+            <input id="i-localidade" placeholder="Ex: Vila Nova"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Eleitor -->
+    <div class="card">
+      <span class="sec-lbl">Dados do eleitor</span>
+      <div class="field"><label>Nome completo *</label>
+        <input id="e-nome" placeholder="Nome do eleitor" autocomplete="off"/></div>
+      <div class="field"><label>WhatsApp *</label>
+        <input id="e-whats" type="tel" placeholder="(92) 99999-0000"
+          oninput="fmtTel(this)" autocomplete="off"/></div>
+      <div class="grid-2">
+        <div class="field"><label>Faixa etária</label>
+          <select id="e-idade">
+            <option value="">Selecionar</option>
+            <option>16-17 anos</option><option>18-24 anos</option>
+            <option>25-34 anos</option><option>35-44 anos</option>
+            <option>45-59 anos</option><option>60+ anos</option>
+          </select></div>
+        <div class="field"><label>Gênero</label>
+          <select id="e-genero">
+            <option value="">Selecionar</option>
+            <option>Masculino</option><option>Feminino</option>
+            <option>Outro</option><option>Prefiro não dizer</option>
+          </select></div>
+      </div>
+      <div class="field"><label>Observação</label>
+        <textarea id="e-obs"
+          placeholder="Ex: Muito receptivo, quer saber sobre saúde e hospitais de qualidade"></textarea>
+      </div>
+    </div>
+
+    <!-- Interesse -->
+    <div class="card">
+      <span class="sec-lbl">Principal interesse do eleitor</span>
+      <div class="int-grid">
+        <button class="int-btn" data-int="Saúde" onclick="selInt(this)">🏥 Saúde</button>
+        <button class="int-btn" data-int="Segurança" onclick="selInt(this)">🛡️ Segurança</button>
+        <button class="int-btn" data-int="Educação" onclick="selInt(this)">📚 Educação</button>
+        <button class="int-btn" data-int="Emprego" onclick="selInt(this)">💼 Emprego</button>
+        <button class="int-btn" data-int="Infraestrutura" onclick="selInt(this)">🏗️ Infraestrutura</button>
+        <button class="int-btn" data-int="Transporte" onclick="selInt(this)">🚌 Transporte</button>
+        <button class="int-btn" data-int="Moradia" onclick="selInt(this)">🏠 Moradia</button>
+        <button class="int-btn" data-int="Agricultura" onclick="selInt(this)">🌱 Agricultura</button>
+        <button class="int-btn" data-int="Meio Ambiente" onclick="selInt(this)">🌿 Meio Ambiente</button>
+        <button class="int-btn" data-int="Mulheres" onclick="selInt(this)">👩 Mulheres</button>
+        <button class="int-btn" data-int="Juventude" onclick="selInt(this)">🎓 Juventude</button>
+        <button class="int-btn" data-int="Outro" onclick="selInt(this)">📝 Outro</button>
+      </div>
+    </div>
+
+    <!-- LGPD -->
+    <div class="lgpd-av">
+      ⚠️ <strong>LGPD:</strong> só cadastre se o eleitor concordar verbalmente
+      em receber contato de David Almeida via WhatsApp.
+    </div>
+    <div class="consent-box">
+      <div class="consent-title">🔒 Consentimento do eleitor — obrigatório</div>
+      <div class="consent-item">
+        <input type="checkbox" id="ck1"/>
+        <span>O eleitor <strong>autorizou verbalmente</strong> o cadastro
+        do seu WhatsApp pela Campanha David Almeida · Avante 70.</span>
+      </div>
+      <div class="consent-item">
+        <input type="checkbox" id="ck2"/>
+        <span>O eleitor <strong>aceitou receber mensagens</strong> de
+        David Almeida (Governador) via WhatsApp.</span>
+      </div>
+      <div class="consent-item">
+        <input type="checkbox" id="ck3"/>
+        <span>O eleitor foi informado que pode
+        <strong>solicitar exclusão</strong> do contato a qualquer momento.</span>
+      </div>
+    </div>
+
+    <button class="btn-send" onclick="salvar()">💾 Salvar cadastro</button>
+    <button class="btn-clear" onclick="limpar()">Limpar formulário</button>
+
+  </div><!-- /panel-form -->
+
+  <!-- LISTA -->
+  <div id="panel-lista" style="display:none">
+    <div class="contador" style="margin-bottom:12px">
+      <div><div class="cnt-n" id="cnt-lista">0</div><div class="cnt-l">Cadastros</div></div>
+      <button onclick="exportCSV()" style="background:#F5C000;color:#1A1A1A;
+        border:none;border-radius:8px;padding:8px 14px;
+        font-size:12px;font-weight:700;cursor:pointer">📥 Exportar CSV</button>
+    </div>
+    <input id="srch" placeholder="🔍 Buscar nome, WhatsApp ou município..."
+      style="width:100%;border:0.5px solid var(--border);border-radius:9px;
+      padding:10px 12px;font-size:14px;outline:none;background:#fff;
+      margin-bottom:10px;display:block" oninput="renderLista()"/>
+    <div id="lista-wrap"></div>
+  </div>
+
+  <div class="avante-footer">
+    <div class="logo-circle" style="width:24px;height:24px;font-size:9px">70</div>
+    <span>Avante 70 · David Almeida · Governador</span>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+const CAND   = "David Almeida";
+const CARGO  = "Governador";
+const NUM    = "70";
+const KEY    = "eleitores_david";
+const WH     = "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtKap6hL2EDCNQFuaJrhJBEoJdVqE4MieHJTpZ9IHpRgW17Q/exec";
+const HOJE   = new Date().toISOString().slice(0,10);
+
+let dados  = JSON.parse(localStorage.getItem(KEY)||"[]");
+let intSel = "", localT = "capital";
+
+function setTab(id){
+  document.getElementById("panel-form").style.display  = id==="form" ?"block":"none";
+  document.getElementById("panel-lista").style.display = id==="lista"?"block":"none";
+  document.getElementById("tab-form").classList.toggle("active",id==="form");
+  document.getElementById("tab-lista").classList.toggle("active",id==="lista");
+  if(id==="lista") renderLista();
+}
+
+function selLocal(btn){
+  document.querySelectorAll(".local-btn").forEach(b=>b.classList.remove("sel"));
+  btn.classList.add("sel"); localT=btn.dataset.local;
+  document.getElementById("bloco-capital").style.display  = localT==="capital" ?"block":"none";
+  document.getElementById("bloco-interior").style.display = localT==="interior"?"block":"none";
+}
+
+function selInt(btn){
+  document.querySelectorAll(".int-btn").forEach(b=>b.classList.remove("sel"));
+  btn.classList.add("sel"); intSel=btn.dataset.int;
+}
+
+function fmtTel(inp){
+  let v=inp.value.replace(/\D/g,"");
+  if(v.length>11) v=v.slice(0,11);
+  if(v.length>6)       v="("+v.slice(0,2)+") "+v.slice(2,7)+"-"+v.slice(7);
+  else if(v.length>2)  v="("+v.slice(0,2)+") "+v.slice(2);
+  inp.value=v;
+}
+
+function salvar(){
+  const aNome=document.getElementById("a-nome").value.trim();
+  const eNome=document.getElementById("e-nome").value.trim();
+  const eWh  =document.getElementById("e-whats").value.trim();
+  if(!aNome){showFb("err","Preencha seu nome.");return;}
+  if(!eNome){showFb("err","Nome do eleitor obrigatório.");return;}
+  if(!eWh||eWh.replace(/\D/g,"").length<10){showFb("err","WhatsApp inválido.");return;}
+  if(!["ck1","ck2","ck3"].every(id=>document.getElementById(id).checked)){
+    showFb("err","Confirme os 3 itens de consentimento.");return;
+  }
+  const tel=eWh.replace(/\D/g,"");
+  if(dados.some(e=>e.whats.replace(/\D/g,"")=== tel)){
+    showFb("err","⚠️ WhatsApp já cadastrado!");return;
+  }
+
+  let zona="",bairro="",mun="",dist="",loc="";
+  if(localT==="capital"){
+    zona  =document.getElementById("c-zona").value;
+    bairro=document.getElementById("c-bairro").value.trim();
+  }else{
+    mun  =document.getElementById("i-municipio").value.trim();
+    dist =document.getElementById("i-distrito").value.trim();
+    loc  =document.getElementById("i-localidade").value.trim();
+    zona ="Interior"; bairro=[mun,dist,loc].filter(Boolean).join(" / ");
+  }
+
+  const el={
+    id:Date.now(), dia:HOJE,
+    hora:new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
+    candidato:CAND, cargo:CARGO, numero:NUM,
+    ativista:aNome, zona_atv:document.getElementById("a-zona").value,
+    tipo_local:localT, zona:zona, bairro:bairro,
+    municipio:mun, distrito:dist, localidade:loc,
+    nome:eNome, whats:eWh,
+    idade:document.getElementById("e-idade").value,
+    genero:document.getElementById("e-genero").value,
+    interesse:intSel,
+    obs:document.getElementById("e-obs").value.trim(),
+    consentimento:true, status:"Novo",
+  };
+
+  dados.push(el);
+  localStorage.setItem(KEY,JSON.stringify(dados));
+
+  try{
+    const p=new URLSearchParams({
+      candidato:el.candidato, cargo:el.cargo, numero:el.numero,
+      nome:el.nome, whats:el.whats, zona:el.zona, bairro:el.bairro,
+      municipio:el.municipio, distrito:el.distrito, localidade:el.localidade,
+      tipo_local:el.tipo_local, ativista:el.ativista, zona_atv:el.zona_atv,
+      idade:el.idade, genero:el.genero, interesse:el.interesse,
+      obs:el.obs, dia:el.dia, hora:el.hora,
+      id:String(el.id), consentimento:"SIM"
+    });
+    new Image().src=WH+"?"+p.toString();
+  }catch(e){console.log(e);}
+
+  atualizarCnt();
+  showFb("ok","✅ "+eNome+" cadastrado! "+eWh);
+  limpar();
+}
+
+function limpar(){
+  ["e-nome","e-whats","e-obs","c-bairro","i-municipio","i-distrito","i-localidade"]
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  ["e-idade","e-genero","c-zona","a-zona"].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value="";
+  });
+  document.querySelectorAll(".int-btn").forEach(b=>b.classList.remove("sel"));
+  document.querySelectorAll(".consent-box input").forEach(c=>c.checked=false);
+  intSel="";
+}
+
+function showFb(t,m){
+  const el=document.getElementById("fb");
+  el.className="fb "+t; el.textContent=m;
+  if(t==="ok") setTimeout(()=>el.className="fb",4000);
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function atualizarCnt(){
+  const h=dados.filter(e=>e.dia===HOJE).length;
+  document.getElementById("cnt-hoje").textContent=h;
+  document.getElementById("cnt-total").textContent=dados.length;
+  document.getElementById("cnt-lista").textContent=dados.length;
+}
+
+function renderLista(){
+  const q=document.getElementById("srch").value.toLowerCase();
+  const lista=dados.filter(e=>!q||
+    e.nome.toLowerCase().includes(q)||e.whats.includes(q)||
+    (e.municipio||"").toLowerCase().includes(q)||
+    (e.bairro||"").toLowerCase().includes(q)
+  ).reverse();
+  const el=document.getElementById("lista-wrap");
+  if(!lista.length){
+    el.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">Nenhum eleitor cadastrado ainda.</div>';
+    return;
+  }
+  el.innerHTML=lista.map(e=>`
+    <div class="lista-card">
+      <div style="font-size:13px;font-weight:600">👤 ${e.nome}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">📱 ${e.whats}${e.bairro?" · 📍 "+e.bairro:""}</div>
+      ${e.municipio?'<div style="font-size:11px;color:var(--muted)">🌿 '+e.municipio+(e.distrito?" / "+e.distrito:"")+'</div>':""}
+      <div style="font-size:11px;color:var(--muted)">Por: ${e.ativista} · ⏰ ${e.hora}</div>
+      <div style="margin-top:5px">
+        ${e.interesse?'<span class="tag">'+e.interesse+'</span>':""}
+        ${e.idade?'<span class="tag">'+e.idade+'</span>':""}
+        ${e.genero?'<span class="tag">'+e.genero+'</span>':""}
+        <span class="tag ok">✅ Consentiu</span>
+      </div>
+    </div>`).join("");
+}
+
+function exportCSV(){
+  if(!dados.length){alert("Nenhum eleitor.");return;}
+  const h=["ID","Data","Hora","Candidato","Cargo","Número","Ativista","Zona Ativista",
+    "Tipo Local","Nome","WhatsApp","Zona","Bairro","Município","Distrito","Localidade",
+    "Faixa Etária","Gênero","Interesse","Observação","Consentimento","Status"];
+  const rows=dados.map(e=>[
+    e.id,e.dia,e.hora,e.candidato,e.cargo,e.numero,e.ativista,e.zona_atv||"",e.tipo_local||"",
+    e.nome,e.whats,e.zona||"",e.bairro||"",e.municipio||"",e.distrito||"",e.localidade||"",
+    e.idade||"",e.genero||"",e.interesse||"",e.obs||"","SIM",e.status||"Novo"
+  ]);
+  const csv=[h,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="eleitores_david_"+HOJE+".csv";a.click();
+  URL.revokeObjectURL(url);
+}
+
+atualizarCnt();
+</script>
+</body>
+</html>
