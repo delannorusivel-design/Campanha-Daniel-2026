@@ -189,6 +189,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
           <div class="field"><label>Bairro</label>
             <input id="c-bairro" placeholder="Ex: Compensa"/></div>
         </div>
+        <div class="grid-2">
+          <div class="field"><label>Rua / Avenida</label>
+            <input id="c-rua" placeholder="Ex: Av. Constantino Nery"/></div>
+          <div class="field"><label>Número / Referência</label>
+            <input id="c-numero-rua" placeholder="Ex: 1200 ou próx. ao mercado"/></div>
+        </div>
+        <div class="field">
+          <label>📍 Coordenadas GPS (automático)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="c-gps" placeholder="Aguardando GPS..." readonly
+              style="flex:1;background:var(--lgray);color:var(--muted);font-size:12px"/>
+            <button onclick="capturarGPS()" type="button"
+              style="background:var(--pri);color:#fff;border:none;border-radius:8px;
+              padding:10px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0">
+              📍 GPS
+            </button>
+          </div>
+        </div>
       </div>
       <div id="bloco-interior" style="display:none">
         <div class="grid-3">
@@ -198,6 +216,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
             <input id="i-distrito" placeholder="Ex: Zona Rural"/></div>
           <div class="field"><label>Localidade</label>
             <input id="i-localidade" placeholder="Ex: Vila Nova"/></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Rua / Ramal</label>
+            <input id="i-rua" placeholder="Ex: Ramal do Km 15"/></div>
+          <div class="field"><label>Referência</label>
+            <input id="i-ref" placeholder="Ex: próx. à escola"/></div>
+        </div>
+        <div class="field">
+          <label>📍 Coordenadas GPS (automático)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="c-gps" placeholder="Aguardando GPS..." readonly
+              style="flex:1;background:var(--lgray);color:var(--muted);font-size:12px"/>
+            <button onclick="capturarGPS()" type="button"
+              style="background:var(--pri);color:#fff;border:none;border-radius:8px;
+              padding:10px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0">
+              📍 GPS
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -360,6 +396,38 @@ function fmtTel(inp){
   inp.value=v;
 }
 
+function capturarGPS() {
+  var btn = event.currentTarget;
+  var inp = document.getElementById("c-gps");
+  btn.textContent = "⏳";
+  btn.disabled = true;
+  if (!navigator.geolocation) {
+    inp.value = "GPS não disponível";
+    btn.textContent = "📍 GPS";
+    btn.disabled = false;
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lat = pos.coords.latitude.toFixed(6);
+      var lng = pos.coords.longitude.toFixed(6);
+      var acc = Math.round(pos.coords.accuracy);
+      inp.value = lat + ", " + lng + " (±" + acc + "m)";
+      inp.dataset.lat = lat;
+      inp.dataset.lng = lng;
+      inp.dataset.acc = acc;
+      btn.textContent = "✅";
+      btn.disabled = false;
+    },
+    function(err) {
+      inp.value = "GPS não obtido — " + err.message;
+      btn.textContent = "📍 GPS";
+      btn.disabled = false;
+    },
+    {enableHighAccuracy: true, timeout: 10000}
+  );
+}
+
 function salvar(){
   const aNome=document.getElementById("a-nome").value.trim();
   const eNome=document.getElementById("e-nome").value.trim();
@@ -423,7 +491,7 @@ function salvar(){
 }
 
 function limpar(){
-  ["e-nome","e-whats","e-obs","c-bairro","i-municipio","i-distrito","i-localidade"]
+  ["e-nome","e-whats","e-obs","c-bairro","i-municipio","i-distrito","i-localidade","c-rua","c-numero-rua","i-rua","i-ref"]
     .forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
   ["e-idade","e-genero","c-zona","a-zona"].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value="";
