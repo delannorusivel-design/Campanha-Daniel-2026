@@ -137,6 +137,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 .footer{display:flex;align-items:center;justify-content:center;
   gap:8px;padding:16px;opacity:.5;}
 .footer span{font-size:10px;color:#888;}
+
+/* GPS STATUS BAR */
+.gps-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  border-radius:8px;margin-bottom:10px;font-size:11px;}
+.gps-bar.loading{background:#FFF3CD;color:#856404;border:1px solid #E2C97A;}
+.gps-bar.ok{background:#C8F0DC;color:#1A7A4A;border:1px solid #5DCAA5;}
+.gps-bar.err{background:#FDDCDC;color:#7B241C;border:1px solid #F09595;}
+.gps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.gps-dot.loading{background:#856404;animation:pulse 1s infinite;}
+.gps-dot.ok{background:#1A7A4A;}
+.gps-dot.err{background:#7B241C;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </head>
 <body>
@@ -164,6 +176,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 
 <!-- ══ FORMULÁRIO ══ -->
 <div class="panel on" id="panel-form">
+
+  
+    <!-- GPS automático -->
+    <div id="gps-bar" class="gps-bar loading">
+      <div class="gps-dot loading" id="gps-dot"></div>
+      <span id="gps-txt">📍 Capturando localização GPS...</span>
+    </div>
 
   <div class="cnt">
     <div><div class="cnt-n" id="cnt-hoje">0</div><div class="cnt-l">Hoje</div></div>
@@ -456,6 +475,17 @@ function salvar() {
   var eNome = document.getElementById("e-nome").value.trim();
   var eFone = document.getElementById("e-fone").value.trim();
 
+
+  // GPS — alerta se não capturou mas deixa salvar com aviso
+  if (!gpsOk) {
+    var conf = confirm(
+      "⚠️ GPS não capturado.\n\n" +
+      "Cadastrar sem localização GPS reduz a confiabilidade do registro.\n\n" +
+      "Deseja continuar mesmo assim?"
+    );
+    if (!conf) return;
+  }
+
   if (!aNome) { showFb("err","Preencha seu nome antes de cadastrar."); return; }
   if (!eNome) { showFb("err","Nome do eleitor é obrigatório."); return; }
   if (!eFone || eFone.replace(/\D/g,"").length < 10) { showFb("err","WhatsApp inválido."); return; }
@@ -503,6 +533,10 @@ function salvar() {
     interesse: intSel,
     intencao:  intencaoSel,
     obs:       document.getElementById("e-obs").value.trim(),
+    gps_lat:   gpsLat,
+    gps_lng:   gpsLng,
+    gps_acc:   String(gpsAcc),
+    maps_url:  gpsMapsUrl,
     consentimento: true, status:"Novo",
   };
 
@@ -518,6 +552,9 @@ function salvar() {
       rua:el.rua, numero_rua:el.numero_rua,
       idade:el.idade, genero:el.genero,
       interesse:el.interesse, intencao_voto:el.intencao,
+      gps_lat:   gpsLat,
+      gps_lng:   gpsLng,
+      gps_acc:   String(gpsAcc),
       obs:el.obs, dia:el.dia, hora:el.hora,
       id:String(el.id), consentimento:"SIM"
     });
@@ -629,9 +666,47 @@ function exportar() {
   URL.revokeObjectURL(url);
 }
 
+
+// ── GPS AUTOMÁTICO ────────────────────────────────────
+var gpsLat = "", gpsLng = "", gpsAcc = "", gpsMapsUrl = "";
+var gpsOk  = false;
+
+function iniciarGPS() {
+  if (!navigator.geolocation) {
+    setGPSStatus("err", "GPS não disponível neste dispositivo");
+    return;
+  }
+  navigator.geolocation.watchPosition(
+    function(pos) {
+      gpsLat = pos.coords.latitude.toFixed(6);
+      gpsLng = pos.coords.longitude.toFixed(6);
+      gpsAcc = Math.round(pos.coords.accuracy);
+      gpsMapsUrl = "https://maps.google.com/?q=" + gpsLat + "," + gpsLng;
+      gpsOk = true;
+      setGPSStatus("ok",
+        "📍 GPS capturado · " + gpsLat + ", " + gpsLng + " (±" + gpsAcc + "m)");
+    },
+    function(err) {
+      gpsOk = false;
+      setGPSStatus("err", "⚠️ GPS bloqueado — habilite a localização no celular");
+    },
+    {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000}
+  );
+}
+
+function setGPSStatus(status, txt) {
+  var bar = document.getElementById("gps-bar");
+  var dot = document.getElementById("gps-dot");
+  var lbl = document.getElementById("gps-txt");
+  bar.className = "gps-bar " + status;
+  dot.className = "gps-dot " + status;
+  lbl.textContent = txt;
+}
+
 // ── INIT ──────────────────────────────────────────────
 atualizarCnt();
 selLocal("capital"); // inicializa Capital como selecionado
+iniciarGPS();
 </script>
 </body>
 </html>
