@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#1A1A1A"/>
+<title>Controle de Líderes — Avante 70 · 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  background:#F0F0F0;color:#1A1A1A;min-height:100vh;padding-bottom:80px}
+
+.hd{background:#1A1A1A;}
+.hd-top{padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.logo{width:40px;height:40px;border-radius:50%;background:#F5C000;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;color:#1A1A1A;flex-shrink:0;}
+.hd-txt h1{font-size:15px;font-weight:700;color:#F5C000;}
+.hd-txt p{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;}
+.hd-bar{height:4px;background:linear-gradient(90deg,#F5C000,#E87722);}
+
+.tabs{display:flex;background:#fff;border-radius:12px;padding:4px;
+  margin:12px 12px 0;border:1px solid #ddd;}
+.tab-btn{flex:1;padding:9px 4px;border:none;border-radius:8px;
+  background:transparent;cursor:pointer;font-size:11px;font-weight:500;color:#888;}
+.tab-btn.on{background:#1A1A1A;color:#F5C000;font-weight:700;}
+
+.content{padding:12px;}
+.panel{display:none;}.panel.on{display:block;}
+
+.card{background:#fff;border-radius:12px;padding:14px;
+  margin-bottom:12px;border:1px solid #ddd;}
+.lbl{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:10px;display:block;}
+.field{margin-bottom:10px;}
+.field label{font-size:11px;color:#888;display:block;margin-bottom:4px;font-weight:500;}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid #ddd;border-radius:9px;
+  padding:11px 12px;font-size:15px;outline:none;
+  background:#fff;-webkit-appearance:none;color:#1A1A1A;}
+.field input:focus,.field select:focus{
+  border-color:#F5C000;box-shadow:0 0 0 3px #FFF8DC;}
+.field textarea{resize:vertical;min-height:60px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* STATUS BUTTONS */
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:4px;}
+.btn-status{padding:10px 8px;border-radius:9px;border:1.5px solid #ddd;
+  background:#fff;cursor:pointer;font-size:12px;font-weight:500;
+  color:#666;text-align:center;display:block;width:100%;-webkit-appearance:none;}
+
+/* META SLIDER */
+.meta-wrap{margin-bottom:10px;}
+.meta-wrap label{font-size:11px;color:#888;display:flex;
+  justify-content:space-between;margin-bottom:4px;}
+.meta-wrap input[type=range]{width:100%;accent-color:#F5C000;}
+
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.kpi{background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #ddd;}
+.kpi-v{font-size:22px;font-weight:700;}
+.kpi-l{font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;}
+
+/* LIDER CARDS */
+.lider-card{background:#fff;border-radius:12px;padding:12px;
+  margin-bottom:10px;border:1px solid #ddd;border-left:4px solid #ddd;}
+.lc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.lc-nome{font-size:14px;font-weight:700;}
+.lc-zona{font-size:11px;color:#888;margin-top:2px;}
+.lc-cand{font-size:10px;padding:2px 8px;border-radius:8px;
+  font-weight:600;display:inline-block;margin-top:3px;}
+.lc-status{font-size:11px;padding:4px 10px;border-radius:8px;font-weight:600;}
+.st-ativo{background:#C8F0DC;color:#1A7A4A;}
+.st-alerta{background:#FFF3CD;color:#856404;}
+.st-critico{background:#FDDCDC;color:#7B241C;}
+.st-inativo{background:#F0F0F0;color:#888;}
+
+.lc-meta-bar{height:6px;background:#F0F0F0;border-radius:3px;overflow:hidden;margin:8px 0;}
+.lc-meta-fill{height:100%;border-radius:3px;transition:width .6s;}
+.lc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px;}
+.lc-stat{text-align:center;background:#F8F8F8;border-radius:6px;padding:6px 4px;}
+.lc-stat-v{font-size:15px;font-weight:700;}
+.lc-stat-l{font-size:8px;color:#888;margin-top:1px;}
+.lc-contato{display:flex;gap:6px;margin-top:8px;}
+.btn-wpp{background:#25D366;color:#fff;border:none;border-radius:8px;
+  padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;
+  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn-cobrar{background:#E87722;color:#fff;border:none;border-radius:8px;
+  padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;
+  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;}
+.btn-edit{background:#F0F0F0;color:#444;border:none;border-radius:8px;
+  padding:7px 12px;font-size:12px;cursor:pointer;flex-shrink:0;}
+
+.btn-main{background:#1A1A1A;color:#F5C000;border:none;border-radius:12px;
+  padding:16px;font-size:15px;font-weight:700;cursor:pointer;
+  width:100%;margin-bottom:8px;display:block;-webkit-appearance:none;}
+.btn-main:active{opacity:.8;}
+.btn-sec{background:#fff;color:#888;border:1px solid #ddd;
+  border-radius:12px;padding:12px;font-size:13px;
+  cursor:pointer;width:100%;display:block;-webkit-appearance:none;}
+
+.fb{padding:12px 14px;border-radius:10px;font-size:13px;
+  margin-bottom:12px;font-weight:500;display:none;}
+.fb.ok{display:block;background:#C8F0DC;color:#1A7A4A;border:1px solid #5DCAA5;}
+.fb.err{display:block;background:#FDDCDC;color:#7B241C;}
+
+.search-inp{width:100%;border:1px solid #ddd;border-radius:9px;
+  padding:10px 12px;font-size:14px;outline:none;
+  background:#fff;margin-bottom:10px;display:block;}
+
+/* CAND FILTER */
+.cand-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.cand-tabs::-webkit-scrollbar{display:none;}
+.cand-tab{flex-shrink:0;padding:7px 13px;border-radius:20px;
+  border:1px solid #ddd;background:#fff;cursor:pointer;
+  font-size:11px;font-weight:500;color:#888;}
+.cand-tab.on{color:#1A1A1A;font-weight:700;}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;
+  background:#1A1A1A;border-top:1px solid #333;
+  display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nav-btn{flex:1;padding:10px 4px 8px;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:10px;font-weight:500;color:#666;}
+.nav-btn.on{color:#F5C000;}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div class="hd-top">
+    <div class="logo">70</div>
+    <div class="hd-txt">
+      <h1>👥 Controle de Líderes</h1>
+      <p>Avante 70 · Amazonas 2026</p>
+    </div>
+  </div>
+  <div class="hd-bar"></div>
+</div>
+
+<div style="padding:12px 12px 0;">
+  <div class="tabs">
+    <button class="tab-btn on" id="tab-painel" onclick="setTab('painel')">📊 Painel</button>
+    <button class="tab-btn" id="tab-cad" onclick="setTab('cad')">➕ Cadastrar</button>
+    <button class="tab-btn" id="tab-reg" onclick="setTab('reg')">📝 Registrar</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ══ PAINEL ══ -->
+<div class="panel on" id="panel-painel">
+
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="cand-tabs" id="cand-tabs"></div>
+
+  <input class="search-inp" id="search"
+    placeholder="🔍 Buscar líder, zona ou município..."
+    oninput="renderPainel()"/>
+
+  <div id="painel-lista"></div>
+
+</div>
+
+<!-- ══ CADASTRAR LÍDER ══ -->
+<div class="panel" id="panel-cad">
+  <div id="fb-cad" class="fb"></div>
+  <div class="card">
+    <span class="lbl">Dados do líder</span>
+    <div class="field"><label>Nome completo *</label>
+      <input id="l-nome" placeholder="Nome do líder"/></div>
+    <div class="g2">
+      <div class="field"><label>WhatsApp *</label>
+        <input id="l-fone" type="tel" placeholder="(92) 99999-0000"
+          oninput="fmtFone(this)"/></div>
+      <div class="field"><label>Candidato *</label>
+        <select id="l-cand">
+          <option value="">Selecionar...</option>
+          <option value="aryel">Aryel Almeida — 7070</option>
+          <option value="daniel">Daniel Almeida — 70070</option>
+          <option value="david">David Almeida — 70</option>
+          <option value="todos">Todos os 3</option>
+        </select></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Tipo de local</label>
+        <select id="l-tipo">
+          <option value="capital">Capital — Manaus</option>
+          <option value="interior">Interior do AM</option>
+        </select></div>
+      <div class="field"><label>Zona / Município</label>
+        <input id="l-zona" placeholder="Ex: Zona Norte ou Parintins"/></div>
+    </div>
+    <div class="field"><label>Bairro / Localidade</label>
+      <input id="l-bairro" placeholder="Ex: Compensa ou Vila Nova"/></div>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Metas do líder</span>
+    <div class="g2">
+      <div class="field"><label>Meta de cabos *</label>
+        <input id="l-meta-cabos" type="number" min="1" placeholder="Ex: 10"/></div>
+      <div class="field"><label>Meta de votos *</label>
+        <input id="l-meta-votos" type="number" min="1" placeholder="Ex: 500"/></div>
+    </div>
+    <div class="field"><label>Observação</label>
+      <textarea id="l-obs" placeholder="Ex: Liderança consolidada no bairro, contato de confiança"></textarea>
+    </div>
+  </div>
+
+  <button class="btn-main" onclick="cadastrarLider()">💾 Cadastrar líder</button>
+  <button class="btn-sec" onclick="limparCad()">Limpar</button>
+</div>
+
+<!-- ══ REGISTRAR PRODUÇÃO ══ -->
+<div class="panel" id="panel-reg">
+  <div id="fb-reg" class="fb"></div>
+  <div class="card">
+    <span class="lbl">Selecione o líder</span>
+    <div class="field">
+      <select id="r-lider" onchange="carregarMetasLider()">
+        <option value="">Selecionar líder...</option>
+      </select>
+    </div>
+    <div id="r-info" style="display:none;background:#F8F8F8;border-radius:8px;
+      padding:10px;margin-top:8px;font-size:12px;color:#444;line-height:1.7;"></div>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Produção do dia</span>
+    <div class="g2">
+      <div class="field"><label>Cabos recrutados</label>
+        <input id="r-cabos" type="number" min="0" placeholder="0"/></div>
+      <div class="field"><label>Eleitores captados</label>
+        <input id="r-votos" type="number" min="0" placeholder="0"/></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Material distribuído</label>
+        <input id="r-material" type="number" min="0" placeholder="0"/></div>
+      <div class="field"><label>Eventos realizados</label>
+        <input id="r-eventos" type="number" min="0" placeholder="0"/></div>
+    </div>
+
+    <div class="field"><label>Status do dia</label>
+      <div class="status-grid" id="status-grid">
+        <button class="btn-status" onclick="selStatus(this)" data-v="No plano">✅ No plano</button>
+        <button class="btn-status" onclick="selStatus(this)" data-v="Atenção">⚠️ Atenção</button>
+        <button class="btn-status" onclick="selStatus(this)" data-v="Crítico">🔴 Crítico</button>
+        <button class="btn-status" onclick="selStatus(this)" data-v="Superou">🏆 Superou</button>
+      </div>
+    </div>
+
+    <div class="field"><label>Gargalo / Dificuldade</label>
+      <select id="r-gargalo">
+        <option value="">Nenhum</option>
+        <option>Faltou material</option>
+        <option>Cabo ausente</option>
+        <option>Baixa receptividade</option>
+        <option>Problema de transporte</option>
+        <option>Zona do adversário difícil</option>
+        <option>Problema pessoal do líder</option>
+        <option>Outro</option>
+      </select></div>
+
+    <div class="field"><label>Observação</label>
+      <textarea id="r-obs" placeholder="Detalhes sobre o dia..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn-main" onclick="registrarProducao()">📝 Registrar produção</button>
+</div>
+
+</div><!-- /content -->
+
+<nav class="bottom-nav">
+  <button class="nav-btn on" id="nav-painel" onclick="setNavTab('painel')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Painel
+  </button>
+  <button class="nav-btn" id="nav-cad" onclick="setNavTab('cad')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+    Cadastrar
+  </button>
+  <button class="nav-btn" id="nav-reg" onclick="setNavTab('reg')">
+    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    Registrar
+  </button>
+</nav>
+
+<script>
+var KEY_L = "lideres_avante70";
+var KEY_R = "registros_avante70";
+var HOJE  = new Date().toISOString().slice(0,10);
+
+var lideres   = JSON.parse(localStorage.getItem(KEY_L)||"[]");
+var registros = JSON.parse(localStorage.getItem(KEY_R)||"[]");
+var candFiltro = "todos";
+var statusSel  = "";
+
+var CANDS = {
+  aryel:  {nome:"Aryel Almeida",  num:"7070",  cor:"#E87722"},
+  daniel: {nome:"Daniel Almeida", num:"70070", cor:"#C49A00"},
+  david:  {nome:"David Almeida",  num:"70",    cor:"#A04000"},
+  todos:  {nome:"Todos",          num:"",      cor:"#F5C000"},
+};
+
+// ── TABS ──────────────────────────────────────────────
+function setTab(id) {
+  ["painel","cad","reg"].forEach(function(t) {
+    document.getElementById("panel-"+t).className = "panel"+(t===id?" on":"");
+    document.getElementById("tab-"+t).className   = "tab-btn"+(t===id?" on":"");
+  });
+  if (id==="painel") renderPainel();
+  if (id==="reg")    popularSelectLideres();
+}
+function setNavTab(id) {
+  setTab(id);
+  ["painel","cad","reg"].forEach(function(t) {
+    document.getElementById("nav-"+t).className = "nav-btn"+(t===id?" on":"");
+  });
+}
+
+// ── PAINEL ────────────────────────────────────────────
+function renderPainel() {
+  var q = (document.getElementById("search").value||"").toLowerCase();
+
+  // KPIs
+  var total    = lideres.length;
+  var ativos   = lideres.filter(function(l){
+    return registros.some(function(r){return r.lider_id===l.id&&r.dia===HOJE;});
+  }).length;
+  var cabosT   = registros.filter(function(r){return r.dia===HOJE;})
+    .reduce(function(a,r){return a+(r.cabos||0);},0);
+  var votosT   = registros.filter(function(r){return r.dia===HOJE;})
+    .reduce(function(a,r){return a+(r.votos||0);},0);
+
+  document.getElementById("kpi-row").innerHTML = [
+    {v:total,  l:"Líderes",     c:"#1A1A1A"},
+    {v:ativos, l:"Ativos hoje", c:"#1A7A4A"},
+    {v:cabosT, l:"Cabos hoje",  c:"#E87722"},
+    {v:votosT, l:"Eleitores",   c:"#1B4F8A"},
+  ].map(function(k){
+    return '<div class="kpi"><div class="kpi-v" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-l">'+k.l+'</div></div>';
+  }).join("");
+
+  // Tabs candidatos
+  var tabs = [{slug:"todos",nome:"Todos"}].concat(
+    Object.entries(CANDS).filter(function(e){return e[0]!=="todos";})
+      .map(function(e){return {slug:e[0],nome:e[1].nome.split(" ")[0]+" "+e[1].num};})
+  );
+  document.getElementById("cand-tabs").innerHTML = tabs.map(function(t){
+    var at = candFiltro===t.slug;
+    var cor = at ? (CANDS[t.slug]||CANDS.todos).cor : "#ddd";
+    return '<button class="cand-tab'+(at?" on":"") + '"'+
+      (at?' style="background:'+cor+';border-color:'+cor+';color:#fff"':'')+
+      ' onclick="filtrarCand(\''+t.slug+'\')">'+t.nome+'</button>';
+  }).join("");
+
+  // Lista de líderes
+  var lista = lideres.filter(function(l){
+    var matchCand = candFiltro==="todos" || l.cand===candFiltro || l.cand==="todos";
+    var matchQ    = !q || l.nome.toLowerCase().includes(q) ||
+      (l.zona||"").toLowerCase().includes(q) ||
+      (l.bairro||"").toLowerCase().includes(q);
+    return matchCand && matchQ;
+  });
+
+  if (!lista.length) {
+    document.getElementById("painel-lista").innerHTML =
+      '<div style="text-align:center;padding:32px;color:#888;font-size:13px">'+
+      'Nenhum líder cadastrado ainda.<br/>Use a aba ➕ Cadastrar.</div>';
+    return;
+  }
+
+  document.getElementById("painel-lista").innerHTML = lista.map(function(l){
+    var cand    = CANDS[l.cand]||CANDS.todos;
+    var regsL   = registros.filter(function(r){return r.lider_id===l.id;});
+    var hojeR   = regsL.filter(function(r){return r.dia===HOJE;})[0];
+    var totCabos= regsL.reduce(function(a,r){return a+(r.cabos||0);},0);
+    var totVotos= regsL.reduce(function(a,r){return a+(r.votos||0);},0);
+    var pctVotos= l.meta_votos>0 ? Math.round(totVotos/l.meta_votos*100) : 0;
+    var pctCabos= l.meta_cabos>0 ? Math.round(totCabos/l.meta_cabos*100) : 0;
+    var status  = hojeR ? hojeR.status : (regsL.length>0?"Sem registro hoje":"Novo");
+    var stCls   = status==="No plano"||status==="Superou"?"st-ativo":
+                  status==="Atenção"?"st-alerta":
+                  status==="Crítico"?"st-critico":"st-inativo";
+    var corBarra= pctVotos>=100?"#1A7A4A":pctVotos>=70?"#F5C000":
+                  pctVotos>=40?"#E87722":"#E24B4A";
+
+    return '<div class="lider-card" style="border-left-color:'+cand.cor+'">'+
+      '<div class="lc-header">'+
+        '<div>'+
+          '<div class="lc-nome">'+l.nome+'</div>'+
+          '<div class="lc-zona">📍 '+(l.zona||"—")+(l.bairro?' · '+l.bairro:'')+'</div>'+
+          '<span class="lc-cand" style="background:'+cand.cor+'22;color:'+cand.cor+'">'+
+            cand.nome+'</span>'+
+        '</div>'+
+        '<span class="lc-status '+stCls+'">'+status+'</span>'+
+      '</div>'+
+      '<div class="lc-meta-bar">'+
+        '<div class="lc-meta-fill" style="width:'+Math.min(pctVotos,100)+'%;background:'+corBarra+'"></div>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:8px">'+
+        '<span>Votos: '+totVotos+' / '+l.meta_votos+'</span>'+
+        '<span style="color:'+corBarra+';font-weight:700">'+pctVotos+'% da meta</span>'+
+      '</div>'+
+      '<div class="lc-stats">'+
+        '<div class="lc-stat"><div class="lc-stat-v" style="color:#E87722">'+totCabos+'</div><div class="lc-stat-l">Cabos</div></div>'+
+        '<div class="lc-stat"><div class="lc-stat-v" style="color:#1B4F8A">'+totVotos+'</div><div class="lc-stat-l">Eleitores</div></div>'+
+        '<div class="lc-stat"><div class="lc-stat-v" style="color:#1A7A4A">'+regsL.length+'</div><div class="lc-stat-l">Registros</div></div>'+
+        '<div class="lc-stat"><div class="lc-stat-v" style="color:'+(pctCabos>=100?"#1A7A4A":"#888")+'">'+pctCabos+'%</div><div class="lc-stat-l">Cabos %</div></div>'+
+      '</div>'+
+      (hojeR&&hojeR.gargalo&&hojeR.gargalo!=="Nenhum"?
+        '<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:10px;color:#856404;margin-top:6px">⚠️ '+hojeR.gargalo+'</div>':'')+
+      '<div class="lc-contato">'+
+        '<button class="btn-wpp" onclick="abrirWpp(\''+l.fone+'\',\''+l.nome.split(" ")[0]+'\')">'+
+          '📱 WhatsApp</button>'+
+        '<button class="btn-cobrar" onclick="cobrar(\''+l.id+'\',\''+l.nome.split(" ")[0]+'\')">'+
+          '🔔 Cobrar</button>'+
+        '<button class="btn-edit" onclick="editarLider(\''+l.id+'\')">✏️</button>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+}
+
+function filtrarCand(slug) { candFiltro=slug; renderPainel(); }
+
+// ── CADASTRAR LÍDER ────────────────────────────────────
+function cadastrarLider() {
+  var nome = document.getElementById("l-nome").value.trim();
+  var fone = document.getElementById("l-fone").value.trim();
+  var cand = document.getElementById("l-cand").value;
+  if (!nome||!fone||!cand) {
+    showFb("fb-cad","err","Preencha nome, WhatsApp e candidato.");return;
+  }
+  var lider = {
+    id:          Date.now(),
+    nome:        nome,
+    fone:        fone,
+    cand:        cand,
+    tipo:        document.getElementById("l-tipo").value,
+    zona:        document.getElementById("l-zona").value.trim(),
+    bairro:      document.getElementById("l-bairro").value.trim(),
+    meta_cabos:  parseInt(document.getElementById("l-meta-cabos").value)||10,
+    meta_votos:  parseInt(document.getElementById("l-meta-votos").value)||500,
+    obs:         document.getElementById("l-obs").value.trim(),
+    dia_cad:     HOJE,
+  };
+  lideres.push(lider);
+  localStorage.setItem(KEY_L, JSON.stringify(lideres));
+  showFb("fb-cad","ok","✅ "+nome+" cadastrado(a) como líder!");
+  limparCad();
+  popularSelectLideres();
+}
+
+function limparCad() {
+  ["l-nome","l-fone","l-zona","l-bairro","l-meta-cabos","l-meta-votos","l-obs"]
+    .forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("l-cand").value="";
+  document.getElementById("l-tipo").value="capital";
+}
+
+// ── REGISTRAR PRODUÇÃO ─────────────────────────────────
+function popularSelectLideres() {
+  var sel = document.getElementById("r-lider");
+  sel.innerHTML = '<option value="">Selecionar líder...</option>';
+  lideres.forEach(function(l){
+    var opt = document.createElement("option");
+    opt.value = l.id; opt.textContent = l.nome+" — "+(l.zona||l.bairro||"");
+    sel.appendChild(opt);
+  });
+}
+
+function carregarMetasLider() {
+  var id  = document.getElementById("r-lider").value;
+  var inf = document.getElementById("r-info");
+  if (!id) { inf.style.display="none"; return; }
+  var l   = lideres.find(function(x){return String(x.id)===String(id);});
+  if (!l) return;
+  var regs = registros.filter(function(r){return r.lider_id==l.id;});
+  var totV = regs.reduce(function(a,r){return a+(r.votos||0);},0);
+  var totC = regs.reduce(function(a,r){return a+(r.cabos||0);},0);
+  inf.style.display = "block";
+  inf.innerHTML =
+    "<strong>"+l.nome+"</strong> · "+l.zona+"<br/>"+
+    "Meta cabos: <strong>"+l.meta_cabos+"</strong> · Já recrutados: <strong>"+totC+"</strong><br/>"+
+    "Meta votos: <strong>"+l.meta_votos+"</strong> · Já captados: <strong>"+totV+"</strong>";
+}
+
+function selStatus(btn) {
+  var btns = document.querySelectorAll("#status-grid .btn-status");
+  for (var i=0;i<btns.length;i++) {
+    btns[i].style.background="#fff";
+    btns[i].style.borderColor="#ddd";
+    btns[i].style.color="#666";
+  }
+  var cores = {
+    "No plano":  {bg:"#C8F0DC",c:"#1A7A4A",bc:"#1A7A4A"},
+    "Atenção":   {bg:"#FFF3CD",c:"#856404",bc:"#856404"},
+    "Crítico":   {bg:"#FDDCDC",c:"#7B241C",bc:"#7B241C"},
+    "Superou":   {bg:"#D6EAF8",c:"#1B4F8A",bc:"#1B4F8A"},
+  };
+  var v = btn.getAttribute("data-v");
+  var cor = cores[v]||{bg:"#F0F0F0",c:"#888",bc:"#999"};
+  btn.style.background  = cor.bg;
+  btn.style.color       = cor.c;
+  btn.style.borderColor = cor.bc;
+  statusSel = v;
+}
+
+function registrarProducao() {
+  var lid = document.getElementById("r-lider").value;
+  if (!lid) { showFb("fb-reg","err","Selecione um líder."); return; }
+  var reg = {
+    id:        Date.now(),
+    lider_id:  parseInt(lid),
+    dia:       HOJE,
+    hora:      new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
+    cabos:     parseInt(document.getElementById("r-cabos").value)||0,
+    votos:     parseInt(document.getElementById("r-votos").value)||0,
+    material:  parseInt(document.getElementById("r-material").value)||0,
+    eventos:   parseInt(document.getElementById("r-eventos").value)||0,
+    status:    statusSel||"Sem status",
+    gargalo:   document.getElementById("r-gargalo").value,
+    obs:       document.getElementById("r-obs").value.trim(),
+  };
+  registros.push(reg);
+  localStorage.setItem(KEY_R, JSON.stringify(registros));
+  var lider = lideres.find(function(l){return l.id===reg.lider_id;});
+  showFb("fb-reg","ok","✅ Produção de "+(lider?lider.nome:"líder")+" registrada!");
+  ["r-cabos","r-votos","r-material","r-eventos","r-obs"]
+    .forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("r-gargalo").value="";
+  document.getElementById("r-lider").value="";
+  document.getElementById("r-info").style.display="none";
+  statusSel="";
+  var btns=document.querySelectorAll("#status-grid .btn-status");
+  for(var i=0;i<btns.length;i++){
+    btns[i].style.background="#fff";
+    btns[i].style.borderColor="#ddd";
+    btns[i].style.color="#666";
+  }
+}
+
+// ── AÇÕES ─────────────────────────────────────────────
+function abrirWpp(fone, nome) {
+  var num = fone.replace(/\D/g,"");
+  if (num.length===11) num="55"+num;
+  window.open("https://wa.me/"+num+"?text=Ol%C3%A1+"+encodeURIComponent(nome)+"!+Tudo+bem%3F", "_blank");
+}
+
+function cobrar(id, nome) {
+  var msg = "⚠️ Cobrança automática\n\nOlá "+nome+"! Passando para saber como está o andamento das atividades de hoje. Precisando de apoio, estou à disposição! 💪\n\nAvante 70 🗳️";
+  var l = lideres.find(function(x){return String(x.id)===String(id);});
+  if (l) abrirWpp(l.fone, nome);
+}
+
+function editarLider(id) {
+  alert("Para editar, vá na aba ➕ Cadastrar, preencha os dados atualizados e salve novamente. (Edição inline em breve!)");
+}
+
+function fmtFone(inp) {
+  var v=inp.value.replace(/\D/g,"");
+  if(v.length>11)v=v.slice(0,11);
+  if(v.length>6)      v="("+v.slice(0,2)+") "+v.slice(2,7)+"-"+v.slice(7);
+  else if(v.length>2) v="("+v.slice(0,2)+") "+v.slice(2);
+  inp.value=v;
+}
+
+function showFb(id,t,m) {
+  var el=document.getElementById(id);
+  el.className="fb "+t; el.textContent=m;
+  if(t==="ok") setTimeout(function(){el.className="fb";},4000);
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+// ── INIT ──────────────────────────────────────────────
+renderPainel();
+popularSelectLideres();
+</script>
+</body>
+</html>
