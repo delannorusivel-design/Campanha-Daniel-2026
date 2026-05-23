@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="theme-color" content="#1A1A1A"/>
+<title>Mapa de Pontos — Avante 70 · 2026</title>
+<style>
+:root{
+  --amarelo:#F5C000;--laranja:#E87722;--preto:#1A1A1A;
+  --green:#1A7A4A;--red:#7B241C;--border:#333;--muted:#718096;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
+  background:#111;color:#fff;min-height:100vh;padding-bottom:80px}
+.header{background:var(--preto);padding:14px 16px;position:sticky;top:0;
+  z-index:100;border-bottom:2px solid var(--amarelo)}
+.header-top{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:50%;background:var(--amarelo);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;color:var(--preto);flex-shrink:0}
+.header h1{font-size:15px;font-weight:700;color:var(--amarelo)}
+.header p{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
+.content{padding:12px}
+.card{background:#1E1E1E;border-radius:12px;padding:14px;
+  margin-bottom:12px;border:0.5px solid var(--border)}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:block}
+
+/* MAPA */
+#mapa{width:100%;height:360px;border-radius:12px;
+  border:0.5px solid var(--border);margin-bottom:12px;
+  background:#141A2E}
+.mapa-placeholder{background:#141A2E;border-radius:12px;
+  height:360px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;margin-bottom:12px;
+  border:0.5px solid var(--border)}
+.mapa-placeholder p{font-size:13px;color:var(--muted);text-align:center;
+  line-height:1.6;max-width:280px}
+
+/* FILTROS */
+.filtros{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filtros::-webkit-scrollbar{display:none}
+.filtro-btn{flex-shrink:0;padding:6px 12px;border-radius:20px;
+  border:0.5px solid var(--border);background:#1E1E1E;cursor:pointer;
+  font-size:11px;font-weight:500;color:var(--muted)}
+.filtro-btn.active{background:var(--amarelo);color:var(--preto);
+  border-color:var(--amarelo);font-weight:700}
+
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:#1E1E1E;border-radius:10px;padding:10px;text-align:center;border:0.5px solid var(--border)}
+.kpi-v{font-size:22px;font-weight:700}
+.kpi-l{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase}
+
+/* LISTA DE RUAS */
+.rua-item{background:#1E1E1E;border-radius:10px;padding:11px 13px;
+  margin-bottom:8px;border:0.5px solid var(--border);
+  border-left:3px solid var(--amarelo)}
+.rua-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rua-nome{font-size:13px;font-weight:600}
+.rua-total{font-size:18px;font-weight:700;color:var(--amarelo)}
+.rua-bairro{font-size:11px;color:var(--muted);margin-bottom:6px}
+.rua-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 7px;border-radius:8px;background:#111;color:var(--muted)}
+.rua-eleit{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.eleitor-row{display:flex;align-items:center;gap:8px;padding:6px 8px;
+  background:#111;border-radius:6px}
+.el-nome{font-size:12px;font-weight:500;flex:1}
+.el-int{font-size:10px;color:var(--muted)}
+.el-maps{font-size:10px;color:var(--amarelo);text-decoration:none;flex-shrink:0}
+.el-intencao{font-size:10px;padding:2px 6px;border-radius:8px;flex-shrink:0}
+.int-sim{background:#C8F0DC;color:#1A7A4A}
+.int-talvez{background:#FFF3CD;color:#856404}
+.int-nao{background:#FDDCDC;color:#7B241C}
+.int-ns{background:#333;color:var(--muted)}
+
+/* TOGGLE EXPANDIR */
+.btn-expand{background:transparent;border:0.5px solid var(--border);
+  border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;
+  color:var(--muted);margin-top:6px;width:100%}
+
+/* CANDIDATO TABS */
+.cand-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.cand-tabs::-webkit-scrollbar{display:none}
+.cand-tab{flex-shrink:0;padding:7px 13px;border-radius:20px;
+  border:0.5px solid var(--border);background:#1E1E1E;cursor:pointer;
+  font-size:11px;font-weight:500;color:var(--muted)}
+.cand-tab.active{color:var(--preto);font-weight:700}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;
+  background:var(--preto);border-top:0.5px solid var(--border);
+  display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;padding:10px 4px 8px;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:10px;font-weight:500;color:var(--muted)}
+.nav-btn.active{color:var(--amarelo)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.panel{display:none}.panel.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">70</div>
+    <div style="flex:1">
+      <h1>📍 Mapa de Pontos por Rua</h1>
+      <p>Avante 70 · Amazonas 2026</p>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- TABS -->
+  <div style="display:flex;gap:0;margin-bottom:14px;background:#1E1E1E;
+    border-radius:10px;padding:4px;border:0.5px solid var(--border)">
+    <button class="nav-btn active" id="tab-mapa" onclick="setTab('mapa')"
+      style="flex:1;border-radius:7px;padding:8px;font-size:12px">
+      🗺️ Mapa
+    </button>
+    <button class="nav-btn" id="tab-lista" onclick="setTab('lista')"
+      style="flex:1;border-radius:7px;padding:8px;font-size:12px">
+      📋 Lista de ruas
+    </button>
+  </div>
+
+  <!-- CANDIDATO TABS -->
+  <div class="cand-tabs" id="cand-tabs"></div>
+
+  <!-- FILTROS -->
+  <div class="filtros" id="filtros-zona"></div>
+
+  <!-- KPIs -->
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <!-- MAPA -->
+  <div class="panel active" id="panel-mapa">
+    <div id="mapa-container">
+      <!-- Mapa Google Maps embed com pontos -->
+      <div class="mapa-placeholder" id="mapa-placeholder">
+        <div style="font-size:48px">🗺️</div>
+        <p>O mapa de pontos abre o Google Maps com todos os eleitores que têm GPS cadastrado.</p>
+        <button onclick="abrirMapaGPS()" style="background:var(--amarelo);color:var(--preto);
+          border:none;border-radius:10px;padding:12px 20px;font-size:14px;
+          font-weight:700;cursor:pointer">
+          📍 Ver pontos no Google Maps
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de pontos com GPS -->
+    <span class="sec-lbl">Eleitores com GPS cadastrado</span>
+    <div id="pontos-gps"></div>
+  </div>
+
+  <!-- LISTA DE RUAS -->
+  <div class="panel" id="panel-lista">
+    <span class="sec-lbl" id="total-ruas-lbl">Ruas com cadastros</span>
+    <div id="lista-ruas"></div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-mapa" onclick="setNavTab('mapa')">
+    <svg viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+    Mapa
+  </button>
+  <button class="nav-btn" id="nav-lista" onclick="setNavTab('lista')">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Ruas
+  </button>
+</nav>
+
+<script>
+const CANDIDATOS = [
+  {nome:"Todos",      slug:"todos",  cor:"#F5C000", key:null},
+  {nome:"Aryel",     slug:"aryel",  cor:"#E87722", key:"eleitores_aryel"},
+  {nome:"Daniel",    slug:"daniel", cor:"#C49A00", key:"eleitores_daniel"},
+  {nome:"David",     slug:"david",  cor:"#A04000", key:"eleitores_david"},
+];
+
+const ZONAS = ["Todas","Zona Norte","Zona Sul","Centro","Zona Oeste","Zona Leste","Interior"];
+let candAtivo = "todos";
+let zonaAtiva = "Todas";
+let expandidos = {};
+
+function carregarDados() {
+  var lista = [];
+  CANDIDATOS.slice(1).forEach(function(c) {
+    var l = JSON.parse(localStorage.getItem(c.key)||"[]");
+    l.forEach(function(e){ e._cand = c.slug; e._cor = c.cor; });
+    lista = lista.concat(l);
+  });
+  return lista;
+}
+
+function filtrarLista() {
+  var lista = carregarDados();
+  if (candAtivo !== "todos")
+    lista = lista.filter(function(e){ return e._cand === candAtivo; });
+  if (zonaAtiva !== "Todas")
+    lista = lista.filter(function(e){ return e.zona === zonaAtiva; });
+  return lista;
+}
+
+function render() {
+  var lista = filtrarLista();
+  var cand  = CANDIDATOS.find(function(c){return c.slug===candAtivo;})||CANDIDATOS[0];
+
+  // Tabs candidatos
+  document.getElementById("cand-tabs").innerHTML = CANDIDATOS.map(function(c){
+    var at = candAtivo===c.slug;
+    return '<button class="cand-tab'+(at?" active":"") + '"' +
+      (at?' style="background:'+c.cor+';border-color:'+c.cor+'"':'') +
+      ' onclick="filtrarCand(\''+c.slug+'\')">'+ c.nome +'</button>';
+  }).join("");
+
+  // Filtros zona
+  document.getElementById("filtros-zona").innerHTML = ZONAS.map(function(z){
+    var at = zonaAtiva===z;
+    return '<button class="filtro-btn'+(at?" active":"")+ '"' +
+      (at?' style="background:'+cand.cor+';border-color:'+cand.cor+';color:#1A1A1A"':'') +
+      ' onclick="filtrarZona(\''+z+'\')">'+ z +'</button>';
+  }).join("");
+
+  // KPIs
+  var comGPS = lista.filter(function(e){return e.gps_lat;}).length;
+  var comRua  = lista.filter(function(e){return e.rua;}).length;
+  document.getElementById("kpi-row").innerHTML = [
+    {v:lista.length,    l:"Total",     c:"var(--amarelo)"},
+    {v:comRua,          l:"Com rua",   c:"var(--laranja)"},
+    {v:comGPS,          l:"Com GPS",   c:"#1A7A4A"},
+  ].map(function(k){
+    return '<div class="kpi"><div class="kpi-v" style="color:'+k.c+'">'+k.v+'</div>' +
+      '<div class="kpi-l">'+k.l+'</div></div>';
+  }).join("");
+
+  // Pontos com GPS
+  var comGPSLista = lista.filter(function(e){return e.gps_lat&&e.gps_lng;});
+  document.getElementById("pontos-gps").innerHTML = comGPSLista.length === 0
+    ? '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">' +
+      'Nenhum eleitor com GPS ainda.<br/>Use o botão 📍 GPS no formulário de cadastro.</div>'
+    : comGPSLista.map(function(e){
+        var intCls = e.intencao_voto==="SIM"?"int-sim":
+          e.intencao_voto==="TALVEZ"?"int-talvez":
+          e.intencao_voto==="NAO"?"int-nao":"int-ns";
+        var intLabel = {SIM:"✅ SIM",TALVEZ:"🤔 TALVEZ",NAO:"❌ NÃO",NAO_SABE:"❓ N/S"}[e.intencao_voto]||"—";
+        return '<div class="eleitor-row" style="margin-bottom:6px">' +
+          '<div style="flex:1;min-width:0">' +
+          '<div class="el-nome">👤 '+e.nome+'</div>' +
+          '<div class="el-int">' +
+            (e.rua?'🛣️ '+e.rua+(e.numero_rua?' nº '+e.numero_rua:'')+'<br/>':'') +
+            '📍 '+e.gps_lat+', '+e.gps_lng+' (±'+e.gps_acc+'m)' +
+          '</div></div>' +
+          '<span class="el-intencao '+intCls+'">'+intLabel+'</span>' +
+          (e.maps_url?'<a class="el-maps" href="'+e.maps_url+'" target="_blank">🗺️ Maps</a>':'') +
+          '</div>';
+      }).join("");
+
+  // Agrupa por rua
+  var porRua = {};
+  lista.filter(function(e){return e.rua;}).forEach(function(e){
+    var chave = (e.rua || "Sem rua").trim() + "||" + (e.bairro||e.municipio||"");
+    if (!porRua[chave]) porRua[chave] = {
+      rua: e.rua, bairro: e.bairro||e.municipio||"",
+      zona: e.zona, eleitores: [], ints:{}, intencoes:{}
+    };
+    porRua[chave].eleitores.push(e);
+    var int = e.interesse||"Outro";
+    porRua[chave].ints[int] = (porRua[chave].ints[int]||0)+1;
+    var inv = e.intencao_voto||"NAO_SABE";
+    porRua[chave].intencoes[inv] = (porRua[chave].intencoes[inv]||0)+1;
+  });
+
+  // Sem rua mas com bairro
+  lista.filter(function(e){return !e.rua&&(e.bairro||e.municipio);}).forEach(function(e){
+    var chave = "📍 Bairro: "+(e.bairro||e.municipio)+"||"+e.zona;
+    if (!porRua[chave]) porRua[chave] = {
+      rua: "📍 "+(e.bairro||e.municipio), bairro: e.zona||"",
+      zona: e.zona, eleitores:[], ints:{}, intencoes:{}
+    };
+    porRua[chave].eleitores.push(e);
+    var int = e.interesse||"Outro";
+    porRua[chave].ints[int] = (porRua[chave].ints[int]||0)+1;
+  });
+
+  var ruasOrdenadas = Object.entries(porRua)
+    .sort(function(a,b){return b[1].eleitores.length - a[1].eleitores.length;});
+
+  document.getElementById("total-ruas-lbl").textContent =
+    ruasOrdenadas.length + " rua" + (ruasOrdenadas.length!==1?"s":"") + " com cadastros";
+
+  if (ruasOrdenadas.length === 0) {
+    document.getElementById("lista-ruas").innerHTML =
+      '<div style="text-align:center;padding:32px;color:var(--muted);font-size:13px">' +
+      'Nenhum cadastro com rua ainda.<br/>Preencha o campo Rua no formulário.</div>';
+    return;
+  }
+
+  document.getElementById("lista-ruas").innerHTML = ruasOrdenadas.map(function(item, idx){
+    var chave = item[0];
+    var dados = item[1];
+    var n     = dados.eleitores.length;
+    var topInt= Object.entries(dados.ints).sort(function(a,b){return b[1]-a[1];})[0];
+    var simN  = dados.intencoes["SIM"]||0;
+    var talvN = dados.intencoes["TALVEZ"]||0;
+    var naoN  = dados.intencoes["NAO"]||0;
+    var exp   = expandidos[chave];
+    var intLabel = topInt ? topInt[0]+" ("+topInt[1]+")" : "—";
+    var pctSim = n>0?Math.round(simN/n*100):0;
+    var corBarra = pctSim>=60?"#1A7A4A":pctSim>=35?"#856404":"#7B241C";
+
+    var eleitoresHTML = "";
+    if (exp) {
+      eleitoresHTML = '<div class="rua-eleit">' +
+        dados.eleitores.map(function(e){
+          var intCls = e.intencao_voto==="SIM"?"int-sim":
+            e.intencao_voto==="TALVEZ"?"int-talvez":
+            e.intencao_voto==="NAO"?"int-nao":"int-ns";
+          var intLabel2 = {SIM:"✅",TALVEZ:"🤔",NAO:"❌",NAO_SABE:"❓"}[e.intencao_voto]||"—";
+          return '<div class="eleitor-row">' +
+            '<div style="flex:1;min-width:0">' +
+            '<div class="el-nome">'+e.nome+'</div>' +
+            '<div class="el-int">'+
+              (e.interesse?e.interesse:'—')+
+              (e.numero_rua?' · nº '+e.numero_rua:'') +
+            '</div></div>' +
+            '<span class="el-intencao '+intCls+'">'+intLabel2+'</span>' +
+            (e.maps_url?'<a class="el-maps" href="'+e.maps_url+'" target="_blank">📍</a>':'') +
+            '</div>';
+        }).join("") + '</div>';
+    }
+
+    return '<div class="rua-item">' +
+      '<div class="rua-header">' +
+      '<div class="rua-nome">🛣️ '+dados.rua+'</div>' +
+      '<div class="rua-total">'+n+'</div></div>' +
+      '<div class="rua-bairro">'+
+        (dados.bairro?'📍 '+dados.bairro+' · ':'')+(dados.zona||'')+'</div>' +
+      '<div class="rua-tags">' +
+        '<span class="tag">'+intLabel+'</span>' +
+        (simN?'<span class="tag" style="background:#C8F0DC;color:#1A7A4A">✅ '+simN+' SIM</span>':'') +
+        (talvN?'<span class="tag" style="background:#FFF3CD;color:#856404">🤔 '+talvN+'</span>':'') +
+        (naoN?'<span class="tag" style="background:#FDDCDC;color:#7B241C">❌ '+naoN+'</span>':'') +
+      '</div>' +
+      '<div style="margin-top:8px;height:4px;background:#111;border-radius:2px;overflow:hidden">' +
+        '<div style="width:'+pctSim+'%;height:100%;background:'+corBarra+';border-radius:2px"></div>' +
+      '</div>' +
+      '<div style="font-size:9px;color:var(--muted);margin-top:2px">'+pctSim+'% favoráveis</div>' +
+      eleitoresHTML +
+      '<button class="btn-expand" onclick="toggleExpand(\''+chave+'\')">'+
+        (exp?'▲ Recolher':'▼ Ver '+n+' eleitor'+(n!==1?'es':''))+'</button>' +
+      '</div>';
+  }).join("");
+}
+
+function abrirMapaGPS() {
+  var lista = filtrarLista().filter(function(e){return e.gps_lat&&e.gps_lng;});
+  if (!lista.length) {
+    alert("Nenhum eleitor com GPS cadastrado ainda.\nUse o botão 📍 GPS no formulário de cadastro.");
+    return;
+  }
+  // Abre Google Maps com todos os pontos
+  var base = "https://maps.google.com/maps/dir/";
+  var pts  = lista.slice(0,10).map(function(e){return e.gps_lat+","+e.gps_lng;}).join("/");
+  window.open("https://maps.google.com/?q="+lista[0].gps_lat+","+lista[0].gps_lng, "_blank");
+
+  // Gera URL do My Maps com todos os pontos
+  if (lista.length > 1) {
+    var kml = '<?xml version="1.0"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document>';
+    lista.forEach(function(e){
+      kml += '<Placemark><name>'+e.nome+'</name>' +
+        '<description>'+e.interesse+' | '+(e.intencao_voto||'—')+'</description>' +
+        '<Point><coordinates>'+e.gps_lng+','+e.gps_lat+',0</coordinates></Point>' +
+        '</Placemark>';
+    });
+    kml += '</Document></kml>';
+    var blob = new Blob([kml], {type:"application/vnd.google-earth.kml+xml"});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement("a");
+    a.href = url; a.download = "eleitores_gps.kml"; a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+function toggleExpand(chave) {
+  expandidos[chave] = !expandidos[chave];
+  render();
+}
+
+function filtrarCand(slug) { candAtivo = slug; render(); }
+function filtrarZona(zona) { zonaAtiva = zona; render(); }
+
+function setTab(id) {
+  document.getElementById("panel-mapa").classList.toggle("active",  id==="mapa");
+  document.getElementById("panel-lista").classList.toggle("active", id==="lista");
+  document.getElementById("tab-mapa").classList.toggle("active",    id==="mapa");
+  document.getElementById("tab-lista").classList.toggle("active",   id==="lista");
+}
+
+function setNavTab(id) {
+  setTab(id);
+  document.getElementById("nav-mapa").classList.toggle("active",  id==="mapa");
+  document.getElementById("nav-lista").classList.toggle("active", id==="lista");
+}
+
+render();
+</script>
+</body>
+</html>
