@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta http-equiv="X-Frame-Options" content="DENY"/>
+<meta name="theme-color" content="#7D2800"/>
+<title>Pesquisa — Governador · Amazonas 2026</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  background:#F0F0F0;color:#1A1A1A;min-height:100vh;padding-bottom:80px}
+#pin-modal{position:fixed;inset:0;background:#1A1A1A;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.logo-pin{width:72px;height:72px;border-radius:50%;background:#E87722;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:900;color:#1A1A1A;margin-bottom:20px;}
+#pin-modal h2{color:#E87722;font-size:20px;font-weight:700;margin-bottom:6px;text-align:center;}
+#pin-modal > p{color:#888;font-size:12px;margin-bottom:24px;text-align:center;}
+#pin-input{background:#2D2D2D;border:2px solid #333;border-radius:12px;
+  padding:16px 20px;font-size:28px;font-weight:700;color:#E87722;
+  text-align:center;width:200px;letter-spacing:8px;outline:none;-webkit-text-security:disc;}
+#pin-input:focus{border-color:#E87722;}
+#pin-err{color:#E87722;font-size:12px;margin-top:10px;min-height:20px;text-align:center;}
+#pin-btn{background:#E87722;color:#1A1A1A;border:none;border-radius:12px;
+  padding:14px 40px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;}
+.pin-dots{display:flex;gap:10px;margin-top:16px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:#333;}
+.pin-dot.filled{background:#E87722;}
+.hd{background:#7D2800;}
+.hd-top{padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.logo{width:40px;height:40px;border-radius:50%;background:#E87722;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;color:#1A1A1A;flex-shrink:0;}
+.hd-txt h1{font-size:14px;font-weight:700;color:#fff;}
+.hd-txt p{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;}
+.cargo-badge{background:#E87722;color:#1A1A1A;font-size:10px;font-weight:900;
+  padding:3px 10px;border-radius:20px;flex-shrink:0;}
+.hd-bar{height:4px;background:linear-gradient(90deg,#E87722,#F5C000);}
+.tabs{display:flex;background:#fff;border-radius:12px;padding:4px;
+  margin:12px 12px 0;border:1px solid #ddd;}
+.tab-btn{flex:1;padding:9px 4px;border:none;border-radius:8px;
+  background:transparent;cursor:pointer;font-size:11px;font-weight:500;color:#888;}
+.tab-btn.on{background:#7D2800;color:#E87722;font-weight:700;}
+.content{padding:12px;}
+.panel{display:none;}.panel.on{display:block;}
+.card{background:#fff;border-radius:12px;padding:14px;
+  margin-bottom:12px;border:1px solid #ddd;}
+.lbl{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:10px;display:block;}
+.field{margin-bottom:10px;}
+.field label{font-size:11px;color:#888;display:block;margin-bottom:4px;font-weight:500;}
+.field input,.field select,.field textarea{width:100%;border:1px solid #ddd;
+  border-radius:9px;padding:11px 12px;font-size:14px;outline:none;
+  background:#fff;-webkit-appearance:none;color:#1A1A1A;}
+.field input:focus,.field select:focus{border-color:#E87722;}
+.field textarea{resize:vertical;min-height:80px;font-size:12px;line-height:1.6;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.kpi{background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #ddd;}
+.kpi-v{font-size:22px;font-weight:700;}
+.kpi-l{font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;}
+.bar-wrap{margin-bottom:8px;}
+.bar-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;}
+.bar-track{height:22px;background:#F0F0F0;border-radius:6px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;
+  justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:700;color:#fff;}
+.resp-card{background:#fff;border-radius:10px;padding:10px 12px;
+  margin-bottom:8px;border-left:3px solid #E87722;border:1px solid #ddd;
+  border-left:3px solid #E87722;}
+.tag{font-size:10px;padding:2px 8px;border-radius:8px;display:inline-block;margin-top:4px;}
+.tag-1{background:#C8F0DC;color:#1A7A4A;}
+.tag-2{background:#FFF3CD;color:#856404;}
+.tag-3{background:#D6EAF8;color:#1B4F8A;}
+.tag-4{background:#F0F0F0;color:#888;}
+.disparo-card{background:#7D2800;border-radius:12px;padding:14px;margin-bottom:12px;}
+.disparo-card .lbl{color:#E87722;}
+.preview-msg{background:#2D2D2D;border-radius:10px;padding:12px;
+  font-size:12px;color:#ddd;line-height:1.7;white-space:pre-wrap;margin-top:8px;}
+.btn-main{background:#7D2800;color:#E87722;border:none;border-radius:12px;
+  padding:16px;font-size:15px;font-weight:700;cursor:pointer;
+  width:100%;margin-bottom:8px;display:block;-webkit-appearance:none;}
+.btn-disparar{background:#E87722;color:#1A1A1A;border:none;border-radius:12px;
+  padding:16px;font-size:15px;font-weight:700;cursor:pointer;
+  width:100%;margin-bottom:8px;display:block;-webkit-appearance:none;}
+.btn-sec{background:#fff;color:#888;border:1px solid #ddd;border-radius:12px;
+  padding:12px;font-size:13px;cursor:pointer;width:100%;display:block;-webkit-appearance:none;}
+.fb{padding:12px 14px;border-radius:10px;font-size:13px;
+  margin-bottom:12px;font-weight:500;display:none;}
+.fb.ok{display:block;background:#C8F0DC;color:#1A7A4A;border:1px solid #5DCAA5;}
+.fb.err{display:block;background:#FDDCDC;color:#7B241C;}
+.search-inp{width:100%;border:1px solid #ddd;border-radius:9px;
+  padding:10px 12px;font-size:14px;outline:none;background:#fff;margin-bottom:10px;display:block;}
+.lgpd-av{background:#FFF3CD;border-radius:8px;padding:10px 12px;
+  font-size:11px;color:#856404;margin-bottom:12px;line-height:1.6;border:1px solid #E2C97A;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#7D2800;
+  border-top:1px solid #333;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nav-btn{flex:1;padding:10px 4px 8px;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:10px;font-weight:500;color:rgba(255,255,255,.5);}
+.nav-btn.on{color:#E87722;}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+</style>
+</head>
+<body>
+
+<div id="pin-modal">
+  <div class="logo-pin">70</div>
+  <h2>Acesso Restrito</h2>
+  <p>Pesquisa · Governador<br/>Digite o PIN de acesso</p>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+  </div>
+  <input id="pin-input" type="password" inputmode="numeric" maxlength="4"
+    placeholder="••••" oninput="atualizarDots()" onkeydown="if(event.key==='Enter')verificarPin()"/>
+  <div id="pin-err"></div>
+  <button id="pin-btn" onclick="verificarPin()">Entrar</button>
+</div>
+
+<div class="hd">
+  <div class="hd-top">
+    <div class="logo">70</div>
+    <div class="hd-txt">
+      <h1>📊 Pesquisa Eleitoral</h1>
+      <p>Instituto de Pesquisa Amazonas 2026</p>
+    </div>
+    <div class="cargo-badge">GOVERNADOR</div>
+  </div>
+  <div class="hd-bar"></div>
+</div>
+
+<div style="padding:12px 12px 0;">
+  <div class="tabs">
+    <button class="tab-btn on" id="tab-dash"    onclick="setTab('dash')">📊 Resultados</button>
+    <button class="tab-btn"    id="tab-disp"    onclick="setTab('disp')">📤 Disparar</button>
+    <button class="tab-btn"    id="tab-config"  onclick="setTab('config')">⚙️ Perguntas</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="panel on" id="panel-dash">
+  <div class="kpi-row" id="kpi-row"></div>
+
+  <div class="card">
+    <span class="lbl">Decisão de voto — Governador</span>
+    <div id="graf-p1"></div>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Prioridades apontadas</span>
+    <div id="graf-p2"></div>
+  </div>
+
+  <div class="card">
+    <span class="lbl">Respostas recebidas</span>
+    <input class="search-inp" id="srch" placeholder="🔍 Buscar..." oninput="renderRespostas()"/>
+    <div id="lista-resps"></div>
+  </div>
+</div>
+
+<!-- DISPARAR -->
+<div class="panel" id="panel-disp">
+  <div class="lgpd-av">
+    ⚖️ Pesquisa de uso interno · Lei 9.504/97 · LGPD Art. 7º,I
+    · Consentimento coletado em campo.
+    <strong>Não divulgar resultados publicamente sem registro no TSE.</strong>
+  </div>
+  <div id="fb-disp" class="fb"></div>
+  <div class="card">
+    <span class="lbl">Selecionar pergunta</span>
+    <div class="field">
+      <select id="d-pergunta" onchange="atualizarPreview()">
+        <option value="p1">Pergunta 1 — Decisão de voto</option>
+        <option value="p2">Pergunta 2 — Prioridade para o governo</option>
+        <option value="p3">Pergunta 3 — Avaliação do governo atual</option>
+      </select>
+    </div>
+    <div class="field"><label>Filtrar por zona (opcional)</label>
+      <select id="d-zona" onchange="atualizarPreview()">
+        <option value="">Todas as zonas</option>
+        <option>Zona Norte</option><option>Zona Sul</option>
+        <option>Centro</option><option>Zona Oeste</option>
+        <option>Zona Leste</option><option>Interior</option>
+      </select></div>
+    <div class="field"><label>Filtrar por intenção (opcional)</label>
+      <select id="d-intencao" onchange="atualizarPreview()">
+        <option value="">Todos</option>
+        <option value="TALVEZ">🤔 Apenas indecisos</option>
+        <option value="NAO_SABE">❓ Apenas "não sabe"</option>
+        <option value="SIM">✅ Apenas confirmados</option>
+      </select></div>
+  </div>
+  <div class="disparo-card">
+    <span class="lbl">Preview da mensagem</span>
+    <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px">
+      Eleitores selecionados: <strong id="d-count" style="color:#E87722">0</strong>
+    </div>
+    <div class="preview-msg" id="preview-msg"></div>
+  </div>
+  <button class="btn-disparar" onclick="disparar()">📤 Disparar pesquisa</button>
+</div>
+
+<!-- CONFIG -->
+<div class="panel" id="panel-config">
+  <div class="card">
+    <span class="lbl">Editar perguntas</span>
+    <div class="field"><label>Pergunta 1 — Decisão de voto</label>
+      <textarea id="cfg-p1" rows="10">Olá, [NOME]! 👋
+
+Instituto de Pesquisa Amazonas 2026.
+
+Pesquisa rápida sobre as eleições para Governador do Amazonas.
+
+Responda só com o número:
+
+1️⃣ — Já sei em quem vou votar para Governador
+2️⃣ — Ainda estou decidindo
+3️⃣ — Não sei ainda
+4️⃣ — Prefiro não responder
+
+Obrigado pela participação! 🙏</textarea></div>
+    <div class="field"><label>Pergunta 2 — Prioridade para o governo</label>
+      <textarea id="cfg-p2" rows="10">Olá, [NOME]! 👋
+
+Instituto de Pesquisa Amazonas 2026.
+
+Qual deve ser a maior prioridade do próximo Governador do Amazonas?
+
+1️⃣ Saúde pública — hospitais e UPAs funcionando
+2️⃣ Segurança — menos crime e mais policiamento
+3️⃣ Economia — empregos e desenvolvimento
+4️⃣ Educação — escolas de qualidade
+5️⃣ Interior — investir nos municípios
+6️⃣ Meio ambiente — proteger a Amazônia
+
+Responda só com o número! 🙏</textarea></div>
+    <div class="field"><label>Pergunta 3 — Avaliação do governo atual</label>
+      <textarea id="cfg-p3" rows="10">Olá, [NOME]! 👋
+
+Instituto de Pesquisa Amazonas 2026.
+
+Como você avalia o atual governo do Amazonas?
+
+1️⃣ Ótimo — está no caminho certo
+2️⃣ Bom — mas pode melhorar
+3️⃣ Regular — resultados abaixo do esperado
+4️⃣ Ruim — decepcionou a população
+5️⃣ Péssimo — piorou a situação do estado
+6️⃣ Não tenho opinião formada
+
+Responda só com o número! 🙏</textarea></div>
+    <button class="btn-main" onclick="salvarConfig()" style="margin-top:8px">💾 Salvar</button>
+  </div>
+  <div class="card">
+    <span class="lbl">Registrar resposta manual</span>
+    <div class="g2">
+      <div class="field"><label>WhatsApp</label>
+        <input id="m-fone" placeholder="(92) 99999-0000" oninput="fmtFone(this)"/></div>
+      <div class="field"><label>Resposta</label>
+        <select id="m-resp">
+          <option value="">Selecionar</option>
+          <option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option>
+          <option value="5">5</option><option value="6">6</option>
+        </select></div>
+    </div>
+    <div class="field"><label>Pergunta respondida</label>
+      <select id="m-perg">
+        <option value="p1">Pergunta 1 — Decisão de voto</option>
+        <option value="p2">Pergunta 2 — Prioridade para o governo</option>
+        <option value="p3">Pergunta 3 — Avaliação do governo atual</option>
+      </select></div>
+    <button class="btn-main" onclick="registrarManual()">➕ Registrar</button>
+  </div>
+</div>
+
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn on" id="nav-dash" onclick="setNavTab('dash')">
+    <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-5"/></svg>
+    Resultados
+  </button>
+  <button class="nav-btn" id="nav-disp" onclick="setNavTab('disp')">
+    <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    Disparar
+  </button>
+  <button class="nav-btn" id="nav-config" onclick="setNavTab('config')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Perguntas
+  </button>
+</nav>
+
+<script>
+var PIN_HASH = "7a3ed03b12b784c2581ae5308e31f2a80248b481d8b0d369ee2193dcc3c1c4c5";
+var SK = "pesq_governador_sessao";
+var RK = "pesq_governador_resps";
+var WH = "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtKap6hL2EDCNQFuaJrhJBEoJdVqE4MieHJTpZ9IHpRgW17Q/exec";
+var TK = "avante70-am-2026-token-secreto";
+var KEY_EL = "el_governador";
+
+// PIN
+async function hashPin(pin){
+  var buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(pin));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function verificarSessao(){
+  try{var s=JSON.parse(sessionStorage.getItem(SK)||"null");
+    if(!s)return false;
+    if(Date.now()-s.ts>8*3600*1000){sessionStorage.removeItem(SK);return false;}
+    return s.ok===true;}catch(e){return false;}
+}
+async function verificarPin(){
+  var pin=document.getElementById("pin-input").value.trim();
+  if(pin.length<4){document.getElementById("pin-err").textContent="Digite 4 dígitos.";return;}
+  var hash=await hashPin(pin);
+  if(hash===PIN_HASH){
+    sessionStorage.setItem(SK,JSON.stringify({ok:true,ts:Date.now()}));
+    document.getElementById("pin-modal").style.display="none";
+    document.body.style.overflow="";
+    renderDash();
+  }else{
+    document.getElementById("pin-err").textContent="PIN incorreto.";
+    document.getElementById("pin-input").value="";
+    atualizarDots();
+    document.getElementById("pin-btn").disabled=true;
+    setTimeout(function(){document.getElementById("pin-btn").disabled=false;},2000);
+  }
+}
+function atualizarDots(){
+  var v=document.getElementById("pin-input").value;
+  for(var i=0;i<4;i++){var d=document.getElementById("pd"+i);if(d)d.className="pin-dot"+(i<v.length?" filled":"");}
+}
+
+var respostas = JSON.parse(localStorage.getItem(RK)||"[]");
+
+function escHtml(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function carregarBase(){return JSON.parse(localStorage.getItem(KEY_EL)||"[]");}
+
+function getBaseDisparo(){
+  var base=carregarBase();
+  var zona=document.getElementById("d-zona")?.value||"";
+  var intencao=document.getElementById("d-intencao")?.value||"";
+  if(zona) base=base.filter(function(e){return e.zona===zona;});
+  if(intencao) base=base.filter(function(e){return e.intencao===intencao;});
+  return base;
+}
+
+function setTab(id){
+  ["dash","disp","config"].forEach(function(t){
+    document.getElementById("panel-"+t).className="panel"+(t===id?" on":"");
+    document.getElementById("tab-"+t).className="tab-btn"+(t===id?" on":"");
+  });
+  if(id==="dash") renderDash();
+  if(id==="disp") atualizarPreview();
+}
+function setNavTab(id){
+  setTab(id);
+  ["dash","disp","config"].forEach(function(t){
+    document.getElementById("nav-"+t).className="nav-btn"+(t===id?" on":"");
+  });
+}
+
+function getPerguntas(){
+  return {
+  "p1": document.getElementById("cfg-p1")?.value || `Olá, [NOME]! 👋
+
+Instituto de Pesquisa Amazonas 2026.
+
+Pesquisa rápida sobre as eleições para Governador do Amazonas.
+
+Responda só com o número:
+
+1️⃣ — Já sei em quem vou votar para Governador
+2️⃣ — Ainda estou decidindo
+3️⃣ — Não sei ainda
+4️⃣ — Prefiro não responder
+
+Obrigado pela participação! 🙏`,
+  "p2": document.getElementById("cfg-p2")?.value || `Olá, [NOME]! 👋
+
+Instituto de Pesquisa Amazonas 2026.
+
+Qual deve ser a maior prioridade do próximo Governador do Amazonas?
+
+1️⃣ Saúde pública — hospitais e UPAs funcionando
+2️⃣ Segurança — menos crime e mais policiamento
+3️⃣ Economia — empregos e desenvolvimento
+4️⃣ Educação — escolas de qualidade
+5️⃣ Interior — investir nos municípios
+6️⃣ Meio ambiente — proteger a Amazônia
+
+Responda só com o número! 🙏`,
+  "p3": document.getElementById("cfg-p3")?.value || `Olá, [NOME]! 👋
+
+Instituto de Pesquisa Amazonas 2026.
+
+Como você avalia o atual governo do Amazonas?
+
+1️⃣ Ótimo — está no caminho certo
+2️⃣ Bom — mas pode melhorar
+3️⃣ Regular — resultados abaixo do esperado
+4️⃣ Ruim — decepcionou a população
+5️⃣ Péssimo — piorou a situação do estado
+6️⃣ Não tenho opinião formada
+
+Responda só com o número! 🙏`,
+  };
+}
+
+function getMsgAtual(){
+  var sel=document.getElementById("d-pergunta")?.value||"p1";
+  var pergs=getPerguntas();
+  return pergs[sel]||pergs["p1"];
+}
+
+function atualizarPreview(){
+  var base=getBaseDisparo();
+  var msg=getMsgAtual().replace(/\[NOME\]/g,"Maria");
+  if(document.getElementById("d-count"))
+    document.getElementById("d-count").textContent=base.length;
+  if(document.getElementById("preview-msg"))
+    document.getElementById("preview-msg").textContent=msg;
+}
+
+function renderDash(){
+  var base=carregarBase();
+  var total=base.length;
+  var resps=respostas.length;
+  var r1=respostas.filter(function(r){return r.resp==="1";}).length;
+  var r2=respostas.filter(function(r){return r.resp==="2";}).length;
+  var r3=respostas.filter(function(r){return r.resp==="3";}).length;
+  var txR=total>0?Math.round(resps/total*100):0;
+
+  document.getElementById("kpi-row").innerHTML=[
+    {v:total,l:"Base",c:"#7D2800"},
+    {v:resps,l:"Responderam",c:"#E87722"},
+    {v:r1,l:"Já decidiu",c:"#1A7A4A"},
+    {v:txR+"%",l:"Taxa",c:"#1B4F8A"},
+  ].map(function(k){
+    return'<div class="kpi"><div class="kpi-v" style="color:'+k.c+'">'+k.v+'</div>'+
+      '<div class="kpi-l">'+k.l+'</div></div>';
+  }).join("");
+
+  // Gráfico P1
+  var opts1=[
+    {v:"1",l:"1️⃣ Já decidiu",c:"#1A7A4A"},
+    {v:"2",l:"2️⃣ Decidindo",c:"#E87722"},
+    {v:"3",l:"3️⃣ Não sabe",c:"#856404"},
+    {v:"4",l:"4️⃣ Não responde",c:"#888"},
+  ];
+  var maxR=Math.max.apply(null,opts1.map(function(o){
+    return respostas.filter(function(r){return r.resp===o.v&&r.perg==="p1";}).length;
+  }).concat([1]));
+  document.getElementById("graf-p1").innerHTML=opts1.map(function(o){
+    var n=respostas.filter(function(r){return r.resp===o.v&&r.perg==="p1";}).length;
+    var pct=resps>0?Math.round(n/resps*100):0;
+    var w=Math.round(n/maxR*100);
+    return'<div class="bar-wrap"><div class="bar-label"><span>'+o.l+'</span>'+
+      '<span style="color:'+o.c+';font-weight:700">'+n+' ('+pct+'%)</span></div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+w+'%;background:'+o.c+'">'+
+      (w>12?pct+'%':'')+'</div></div></div>';
+  }).join("");
+
+  // Gráfico P2
+  var opts2=["1","2","3","4","5","6"].map(function(v){
+    return{v:v,n:respostas.filter(function(r){return r.resp===v&&r.perg==="p2";}).length};
+  });
+  var maxO=Math.max.apply(null,opts2.map(function(o){return o.n;}).concat([1]));
+  var cores=["#E87722","#F5C000","#1A7A4A","#1B4F8A","#4A235A","#E87722"];
+  document.getElementById("graf-p2").innerHTML=opts2.filter(function(o){return o.n>0;}).map(function(o,i){
+    var pct=resps>0?Math.round(o.n/resps*100):0;
+    var w=Math.round(o.n/maxO*100);
+    return'<div class="bar-wrap"><div class="bar-label"><span>Opção '+o.v+'</span>'+
+      '<span style="color:'+cores[i%6]+';font-weight:700">'+o.n+' ('+pct+'%)</span></div>'+
+      '<div class="bar-track"><div class="bar-fill" style="width:'+w+'%;background:'+cores[i%6]+'">'+
+      (w>12?pct+'%':'')+'</div></div></div>';
+  }).join("")||'<div style="color:#888;font-size:12px;text-align:center;padding:16px">Nenhuma resposta P2 ainda.</div>';
+
+  renderRespostas();
+}
+
+function renderRespostas(){
+  var q=(document.getElementById("srch")||{}).value?.toLowerCase()||"";
+  var lista=respostas.filter(function(r){
+    return !q||r.nome?.toLowerCase().includes(q)||r.fone?.includes(q);
+  }).reverse();
+  var el=document.getElementById("lista-resps");
+  if(!lista.length){
+    el.innerHTML='<div style="text-align:center;padding:24px;color:#888;font-size:13px">Nenhuma resposta ainda.</div>';
+    return;
+  }
+  var clsMap={"1":"tag-1","2":"tag-2","3":"tag-3","4":"tag-4"};
+  el.innerHTML=lista.map(function(r){
+    return'<div class="resp-card">'+
+      '<div style="font-size:12px;font-weight:600">👤 '+escHtml(r.nome||"Não identificado")+'</div>'+
+      '<div style="font-size:10px;color:#888">📱 '+escHtml(r.fone)+' · '+r.perg?.toUpperCase()+' · ⏰ '+r.hora+'</div>'+
+      '<span class="tag '+(clsMap[r.resp]||"tag-4")+'">Resposta: '+r.resp+'</span>'+
+      '</div>';
+  }).join("");
+}
+
+function disparar(){
+  var base=getBaseDisparo();
+  if(!base.length){showFb("fb-disp","err","Nenhum eleitor com os filtros selecionados.");return;}
+  if(!confirm("Disparar para "+base.length+" eleitores?"))return;
+  var perg=document.getElementById("d-pergunta").value;
+  var msg=getMsgAtual();
+  var enviados=0;
+  base.forEach(function(e){
+    var m=msg.replace(/\[NOME\]/g,(e.nome||"").split(" ")[0]);
+    try{
+      var params=new URLSearchParams({
+        acao:"pesquisa_disparo",cargo:"governador",perg:perg,
+        fone:e.fone,nome:e.nome,zona:e.zona||"",
+        dia:new Date().toISOString().slice(0,10),token:TK
+      });
+      new Image().src=WH+"?"+params.toString();
+    }catch(err){console.log(err);}
+    enviados++;
+  });
+  showFb("fb-disp","ok","✅ "+enviados+" disparos registrados!");
+}
+
+function registrarManual(){
+  var fone=document.getElementById("m-fone").value.trim();
+  var resp=document.getElementById("m-resp").value;
+  var perg=document.getElementById("m-perg").value;
+  if(!fone||!resp){alert("Preencha WhatsApp e resposta.");return;}
+  var base=carregarBase();
+  var el=base.find(function(e){return(e.fone||"").replace(/\D/g,"")=== fone.replace(/\D/g,"");});
+  var reg={
+    id:Date.now(),fone:fone,nome:el?el.nome:"Não identificado",
+    resp:resp,perg:perg,
+    dia:new Date().toISOString().slice(0,10),
+    hora:new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}),
+    manual:true
+  };
+  respostas.push(reg);
+  localStorage.setItem(RK,JSON.stringify(respostas));
+  document.getElementById("m-fone").value="";
+  document.getElementById("m-resp").value="";
+  alert("✅ Resposta registrada!");
+  renderDash();
+}
+
+function salvarConfig(){
+  ["p1","p2","p3"].forEach(function(id){
+    var el=document.getElementById("cfg-"+id);
+    if(el) localStorage.setItem("pesq_governador_"+id,el.value);
+  });
+  alert("✅ Perguntas salvas!");
+}
+
+function fmtFone(inp){
+  var v=inp.value.replace(/\D/g,"");
+  if(v.length>11)v=v.slice(0,11);
+  if(v.length>6) v="("+v.slice(0,2)+") "+v.slice(2,7)+"-"+v.slice(7);
+  else if(v.length>2) v="("+v.slice(0,2)+") "+v.slice(2);
+  inp.value=v;
+}
+
+function showFb(id,t,m){
+  var el=document.getElementById(id);if(!el)return;
+  el.className="fb "+t;el.textContent=m;
+  if(t==="ok") setTimeout(function(){el.className="fb";},5000);
+}
+
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",function(){
+    if(!verificarSessao()){document.getElementById("pin-modal").style.display="flex";document.body.style.overflow="hidden";}
+    else{document.getElementById("pin-modal").style.display="none";renderDash();}
+  });
+}else{
+  if(!verificarSessao()){document.getElementById("pin-modal").style.display="flex";document.body.style.overflow="hidden";}
+  else{document.getElementById("pin-modal").style.display="none";renderDash();}
+}
+</script>
+</body>
+</html>
