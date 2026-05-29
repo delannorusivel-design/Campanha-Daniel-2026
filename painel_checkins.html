@@ -325,10 +325,7 @@ function buscarCheckinsServidor() {
   if (agora - _ultimaBusca < 20000) return; // throttle 20s
   _ultimaBusca = agora;
 
-  var url = "WEBHOOK_URL?acao=listar_checkins&dia=HOJE&token=TOKEN_VAL"
-    .replace("WEBHOOK_URL", "https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec")
-    .replace("HOJE", hoje)
-    .replace("TOKEN_VAL", "avante70-am-2026-token-secreto");
+  var url = "https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec?acao=listar_checkins&dia=" + hoje + "&token=avante70-am-2026-token-secreto";
 
   fetch(url, {mode:"cors"})
     .then(function(r){ return r.json(); })
