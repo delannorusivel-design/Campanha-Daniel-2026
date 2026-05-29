@@ -853,22 +853,27 @@ function enviarCheckin() {
   var img = new Image();
   img.src = "https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec?" + p;
 
-  // Envia foto separadamente via POST (em background)
+  // Envia foto via formulário POST (compatível com Apps Script)
   if (fotoBase64) {
-    var fotoComprimida = comprimirFoto(fotoBase64, 800, 0.6);
-    fetch("https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec", {
-      method: "POST",
-      mode: "no-cors",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        acao: "salvar_foto",
-        token: "avante70-am-2026-token-secreto",
-        id: String(checkin.id),
-        nome: checkin.nome,
-        dia: checkin.dia,
-        foto: fotoComprimida
-      })
-    }).catch(function(e){ console.log("Foto:", e); });
+    setTimeout(function() {
+      try {
+        var fotoComprimida = comprimirFoto(fotoBase64, 600, 0.5);
+        // Usa XMLHttpRequest que funciona melhor com Apps Script
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec", true);
+        xhr.setRequestHeader("Content-Type", "text/plain");
+        xhr.send(JSON.stringify({
+          acao:  "salvar_foto",
+          token: "avante70-am-2026-token-secreto",
+          id:    String(checkin.id),
+          nome:  checkin.nome,
+          dia:   checkin.dia,
+          foto:  fotoComprimida
+        }));
+        xhr.onload = function() { console.log("Foto enviada:", xhr.status); };
+        xhr.onerror = function() { console.log("Foto erro de rede"); };
+      } catch(e) { console.log("Foto ex:", e); }
+    }, 2000);
   }
 
   // 4. Limpa campos após 1 segundo
