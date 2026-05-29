@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -61,40 +62,96 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
 .checkin-card{background:#fff;border-radius:16px;padding:16px;
   margin-bottom:12px;border:0.5px solid var(--border)}
 
-/* Camera */
-.camera-wrap{position:relative;background:#1C1C1C;border-radius:12px;
-  overflow:hidden;aspect-ratio:4/3;margin-bottom:12px;
-  display:flex;align-items:center;justify-content:center}
-#video{width:100%;height:100%;object-fit:cover;display:block}
+/* ── CÂMERA PROFISSIONAL ── */
+.cam-container{position:relative;background:#000;border-radius:16px;
+  overflow:hidden;margin-bottom:12px;width:100%}
+.cam-viewfinder{position:relative;width:100%;aspect-ratio:4/3;
+  background:#111;display:flex;align-items:center;justify-content:center}
+#video{width:100%;height:100%;object-fit:cover;display:block;
+  border-radius:0;-webkit-transform:translateZ(0);transform:translateZ(0)}
 #canvas{display:none}
-.camera-overlay{position:absolute;inset:0;display:flex;
-  flex-direction:column;align-items:center;justify-content:center;
-  color:#fff;text-align:center;padding:16px}
-.camera-icon{font-size:48px;margin-bottom:8px}
-.camera-txt{font-size:13px;opacity:.8}
-#foto-preview{width:100%;border-radius:12px;display:none;aspect-ratio:4/3;object-fit:cover}
-.foto-info{position:absolute;bottom:8px;left:8px;right:8px;
-  background:rgba(0,0,0,.6);border-radius:8px;padding:6px 10px;
-  font-size:10px;color:#fff;display:none}
+#foto-preview{width:100%;height:100%;object-fit:cover;display:none;
+  position:absolute;inset:0}
 
-/* GPS */
-.gps-row{display:flex;align-items:center;gap:8px;padding:10px 12px;
-  background:var(--lgray);border-radius:10px;margin-bottom:12px;font-size:12px}
-.gps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.gps-dot.ok{background:var(--green)}.gps-dot.loading{background:var(--amber);animation:pulse 1s infinite}
-.gps-dot.err{background:var(--red)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* Overlay inicial */
+.cam-idle{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;background:rgba(0,0,0,.85);
+  cursor:pointer;z-index:10}
+.cam-idle-icon{font-size:56px;margin-bottom:10px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
+.cam-idle-txt{font-size:14px;color:#fff;font-weight:600;margin-bottom:4px}
+.cam-idle-sub{font-size:11px;color:rgba(255,255,255,.5)}
 
-/* Tipo de ação */
-.tipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
-.tipo-btn{padding:10px 6px;border-radius:10px;border:0.5px solid var(--border);
-  background:#fff;cursor:pointer;font-size:11px;font-weight:500;
-  color:var(--muted);text-align:center;transition:all .15s;
-  display:flex;flex-direction:column;align-items:center;gap:3px}
-.tipo-btn .ti{font-size:20px}
-.tipo-btn.sel{border-color:var(--blue);background:var(--lblue);color:var(--blue)}
+/* Viewfinder ativo — guias */
+.cam-guide{position:absolute;inset:0;pointer-events:none;z-index:5}
+.cam-guide::before,.cam-guide::after{content:"";position:absolute;
+  width:60px;height:60px;border-color:rgba(255,255,255,.7);border-style:solid}
+.cam-guide::before{top:16px;left:16px;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.cam-guide::after{top:16px;right:16px;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.cam-guide-b::before,.cam-guide-b::after{content:"";position:absolute;
+  width:60px;height:60px;border-color:rgba(255,255,255,.7);border-style:solid}
+.cam-guide-b::before{bottom:16px;left:16px;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.cam-guide-b::after{bottom:16px;right:16px;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
 
-/* Botões de ação */
+/* Mira central */
+.cam-crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:40px;height:40px;pointer-events:none;z-index:5}
+.cam-crosshair::before{content:"";position:absolute;top:50%;left:0;right:0;
+  height:1px;background:rgba(255,255,255,.4)}
+.cam-crosshair::after{content:"";position:absolute;left:50%;top:0;bottom:0;
+  width:1px;background:rgba(255,255,255,.4)}
+
+/* Barra de controles */
+.cam-controls{position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,.8));
+  padding:20px 16px 14px;display:none;z-index:10;
+  align-items:center;justify-content:space-between}
+.cam-controls.visible{display:flex}
+.cam-ctrl-btn{width:44px;height:44px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.2);color:#fff;font-size:18px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.cam-ctrl-btn:active{transform:scale(.9);background:rgba(255,255,255,.35)}
+
+/* Botão obturador */
+.cam-shutter{width:72px;height:72px;border-radius:50%;
+  border:4px solid #fff;background:transparent;
+  cursor:pointer;position:relative;display:flex;
+  align-items:center;justify-content:center}
+.cam-shutter::after{content:"";width:56px;height:56px;border-radius:50%;
+  background:#fff;display:block;transition:transform .1s}
+.cam-shutter:active::after{transform:scale(.85)}
+
+/* Zoom indicator */
+.cam-zoom{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.5);color:#fff;font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:20px;z-index:10;display:none;
+  -webkit-backdrop-filter:blur(4px)}
+
+/* Flash overlay */
+.cam-flash{position:absolute;inset:0;background:#fff;opacity:0;
+  pointer-events:none;z-index:20;transition:opacity .15s}
+
+/* Preview mode */
+.cam-preview-controls{display:none;padding:10px 12px;background:#111;
+  align-items:center;justify-content:space-between;gap:8px}
+.cam-preview-controls.visible{display:flex}
+.btn-preview-action{flex:1;padding:11px;border:none;border-radius:10px;
+  font-size:13px;font-weight:700;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;gap:6px}
+.btn-usar{background:#1A7A4A;color:#fff}
+.btn-refazer{background:#333;color:#fff}
+
+/* Info da foto */
+.foto-stamp{position:absolute;bottom:8px;left:8px;right:8px;
+  background:rgba(0,0,0,.6);border-radius:6px;padding:5px 8px;
+  font-size:10px;color:#fff;display:none;z-index:15;line-height:1.6;
+  -webkit-backdrop-filter:blur(4px)}
+
+/* Qualidade badge */
+.cam-quality{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.5);
+  color:#F5C000;font-size:10px;font-weight:700;padding:3px 8px;
+  border-radius:20px;z-index:10;display:none}
+
 .btn-cam{background:var(--navy);color:#fff;border:none;border-radius:12px;
   padding:14px;font-size:15px;font-weight:600;cursor:pointer;
   width:100%;margin-bottom:8px;display:flex;align-items:center;
@@ -197,16 +254,77 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
   <div class="checkin-card">
     <span class="sec-lbl">Novo check-in</span>
 
-    <!-- Camera -->
-    <div class="camera-wrap" id="camera-wrap">
-      <video id="video" autoplay playsinline muted></video>
-      <div class="camera-overlay" id="cam-overlay">
-        <div class="camera-icon">📷</div>
-        <div class="camera-txt">Toque para ativar a câmera</div>
+    <!-- Câmera Profissional -->
+    <div class="cam-container" id="cam-container">
+
+      <!-- Viewfinder -->
+      <div class="cam-viewfinder" id="cam-viewfinder">
+
+        <!-- Vídeo ao vivo -->
+        <video id="video" autoplay playsinline muted
+          style="width:100%;height:100%;object-fit:cover;display:none"></video>
+
+        <!-- Preview da foto tirada -->
+        <img id="foto-preview" alt="Foto capturada"
+          style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0"/>
+
+        <!-- Tela inicial (idle) -->
+        <div class="cam-idle" id="cam-idle" onclick="iniciarCamera()">
+          <div class="cam-idle-icon">📷</div>
+          <div class="cam-idle-txt">Toque para abrir a câmera</div>
+          <div class="cam-idle-sub">📷 Traseira · 🤳 Selfie — alterne nos controles</div>
+        </div>
+
+        <!-- Guias do viewfinder (aparecem quando câmera ativa) -->
+        <div class="cam-guide" id="cam-guide" style="display:none"></div>
+        <div class="cam-guide-b" id="cam-guide-b" style="display:none"
+          style="position:absolute;inset:0;pointer-events:none;z-index:5"></div>
+        <div class="cam-crosshair" id="cam-crosshair" style="display:none"></div>
+
+        <!-- Badge de qualidade -->
+        <div class="cam-quality" id="cam-quality">HD</div>
+
+        <!-- Zoom indicator -->
+        <div class="cam-zoom" id="cam-zoom">1×</div>
+
+        <!-- Flash overlay -->
+        <div class="cam-flash" id="cam-flash"></div>
+
+        <!-- Carimbo na foto -->
+        <div class="foto-stamp" id="foto-stamp"></div>
+
+        <!-- Canvas oculto para captura -->
+        <canvas id="canvas" style="display:none"></canvas>
       </div>
-      <img id="foto-preview" alt="Foto capturada"/>
-      <div class="foto-info" id="foto-info"></div>
-      <canvas id="canvas"></canvas>
+
+      <!-- Controles da câmera ativa -->
+      <div class="cam-controls" id="cam-controls">
+        <!-- Virar câmera / Selfie -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <button class="cam-ctrl-btn" id="btn-virar" onclick="virarCamera()" title="Selfie / Traseira">🤳</button>
+          <span id="lbl-cam" style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600">SELFIE</span>
+        </div>
+
+        <!-- Obturador -->
+        <div class="cam-shutter" id="cam-shutter" onclick="tirarFoto()"></div>
+
+        <!-- Fechar câmera -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <button class="cam-ctrl-btn" onclick="fecharCamera()" title="Fechar">✕</button>
+          <span style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600">FECHAR</span>
+        </div>
+      </div>
+
+      <!-- Controles do preview -->
+      <div class="cam-preview-controls" id="cam-preview-controls">
+        <button class="btn-preview-action btn-refazer" onclick="retake()">
+          🔄 Tirar outra
+        </button>
+        <button class="btn-preview-action btn-usar" onclick="confirmarFoto()">
+          ✅ Usar esta foto
+        </button>
+      </div>
+
     </div>
 
     <!-- GPS -->
@@ -250,12 +368,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
       <input id="f-obs" placeholder="Ex: Boa receptividade no bairro"/>
     </div>
 
-    <!-- Botões -->
-    <button class="btn-cam" id="btn-cam" onclick="toggleCamera()">
-      📷 Ativar câmera
-    </button>
-    <button class="btn-cam secondary" id="btn-retake" onclick="retake()" style="display:none">
-      🔄 Tirar outra foto
+    <!-- Fallback para iOS: input file -->
+    <input type="file" id="file-fallback" accept="image/*" capture="environment"
+      style="display:none" onchange="usarFotoFallback(this)"/>
+    <button class="btn-cam secondary" id="btn-fallback"
+      onclick="document.getElementById('file-fallback').click()"
+      style="background:#1B4F8A;font-size:13px;padding:10px">
+      📁 Problemas com a câmera? Use a galeria
     </button>
     <button class="btn-send" id="btn-send" onclick="enviarCheckin()">
       ✅ Enviar check-in
@@ -296,6 +415,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
 </div>
 
 <script>
+
+function escHtml(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#x27;");
+}
+
 // ── ESTADO ──────────────────────────────────────────
 let perfil   = JSON.parse(localStorage.getItem("perfil_ativista") || "null");
 let checkins = JSON.parse(localStorage.getItem("checkins_hoje") || "[]");
@@ -351,23 +476,213 @@ function setGPS(status, txt) {
 }
 
 // ── CÂMERA ──────────────────────────────────────────
-async function toggleCamera() {
-  if (camAtiva) { tirarFoto(); return; }
-  try {
-    streamV = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:960} },
-      audio: false
-    });
-    const video = document.getElementById("video");
-    video.srcObject = streamV;
-    document.getElementById("cam-overlay").style.display = "none";
-    document.getElementById("foto-preview").style.display = "none";
-    document.getElementById("btn-cam").innerHTML = "📸 Tirar foto";
-    camAtiva = true;
-  } catch(e) {
-    showFb("err", "Câmera não permitida. Verifique as permissões do navegador.");
+// ── CÂMERA ──────────────────────────────────────────
+var facingMode = "environment"; // traseira por padrão
+
+function iniciarCamera() {
+  var idle = document.getElementById("cam-idle");
+  if (idle) {
+    idle.innerHTML = '<div class="cam-idle-icon">⏳</div>' +
+      '<div class="cam-idle-txt">Aguardando permissão...</div>';
   }
+
+  var constraints = {
+    audio: false,
+    video: {
+      facingMode: { ideal: facingMode },
+      width:  { ideal: 1920 },
+      height: { ideal: 1440 }
+    }
+  };
+
+  // Para o stream anterior se existir
+  if (streamV) {
+    streamV.getTracks().forEach(function(t){ t.stop(); });
+    streamV = null;
+  }
+
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(function(stream) {
+      streamV = stream;
+      var video = document.getElementById("video");
+
+      // Atributos obrigatórios para iOS Safari
+      video.setAttribute("autoplay", "");
+      video.setAttribute("muted",    "");
+      video.setAttribute("playsinline", "");
+      video.srcObject = stream;
+
+      video.play().then(function() {
+        // Mostra viewfinder ativo
+        document.getElementById("cam-idle").style.display    = "none";
+        // Espelha vídeo se câmera frontal
+        video.style.transform = facingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
+        document.getElementById("cam-guide").style.display   = "block";
+        document.getElementById("cam-guide-b").style.display = "block";
+        document.getElementById("cam-crosshair").style.display = "block";
+        document.getElementById("cam-controls").classList.add("visible");
+        document.getElementById("cam-quality").style.display = "block";
+        document.getElementById("cam-zoom").style.display    = "block";
+        video.style.display = "block";
+        camAtiva = true;
+
+        // Detecta resolução real
+        setTimeout(function() {
+          var w = video.videoWidth, h = video.videoHeight;
+          var qual = (w >= 1920) ? "4K" : (w >= 1280) ? "HD" : "SD";
+          var qEl = document.getElementById("cam-quality");
+          if (qEl) qEl.textContent = qual + " " + w + "×" + h;
+        }, 500);
+
+      }).catch(function() {
+        // iOS: precisa de segundo toque para play
+        var idle2 = document.getElementById("cam-idle");
+        idle2.innerHTML = '<div class="cam-idle-icon">▶️</div>' +
+          '<div class="cam-idle-txt">Toque para iniciar</div>';
+        idle2.style.display = "flex";
+        idle2.onclick = function() {
+          video.play();
+          idle2.style.display = "none";
+          document.getElementById("cam-controls").classList.add("visible");
+          video.style.display = "block";
+          camAtiva = true;
+          idle2.onclick = iniciarCamera;
+        };
+      });
+    })
+    .catch(function(err) {
+      var msgs = {
+        "NotAllowedError":    "Permissão negada. Ajustes → Safari → Câmera → Permitir.",
+        "PermissionDeniedError":"Permissão negada. Ajustes → Safari → Câmera → Permitir.",
+        "NotFoundError":      "Câmera não encontrada.",
+        "NotReadableError":   "Câmera em uso por outro app. Feche-o e tente novamente.",
+        "NotSupportedError":  "Use o Safari no iPhone para acessar a câmera.",
+        "OverconstrainedError":"Ajustando qualidade...",
+      };
+      var msg = msgs[err.name] || "Câmera indisponível: " + err.name;
+
+      // Se OverConstrained, tenta com qualidade menor
+      if (err.name === "OverconstrainedError") {
+        navigator.mediaDevices.getUserMedia({audio:false,
+          video:{facingMode:{ideal:facingMode}}})
+          .then(function(s){ streamV=s;
+            var v=document.getElementById("video");
+            v.srcObject=s; v.play();
+            document.getElementById("cam-idle").style.display="none";
+            document.getElementById("cam-controls").classList.add("visible");
+            v.style.display="block"; camAtiva=true;
+          }).catch(function(){});
+        return;
+      }
+
+      var idle = document.getElementById("cam-idle");
+      idle.innerHTML = '<div class="cam-idle-icon">❌</div>' +
+        '<div class="cam-idle-txt" style="font-size:12px;padding:0 20px">' + msg + '</div>';
+      showFb("err", msg);
+    });
 }
+
+function virarCamera() {
+  facingMode = facingMode === "environment" ? "user" : "environment";
+  // Espelha vídeo ao vivo na frontal (selfie natural)
+  var video = document.getElementById("video");
+  video.style.transform = facingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
+  // Atualiza label e ícone
+  var lbl = document.getElementById("lbl-cam");
+  var btn = document.getElementById("btn-virar");
+  if (lbl) lbl.textContent = facingMode === "user" ? "TRASEIRA" : "SELFIE";
+  if (btn) btn.textContent = facingMode === "user" ? "📷" : "🤳";
+  iniciarCamera();
+}
+
+function fecharCamera() {
+  if (streamV) { streamV.getTracks().forEach(function(t){t.stop();}); streamV=null; }
+  var video = document.getElementById("video");
+  video.srcObject = null; video.style.display = "none";
+  document.getElementById("cam-idle").innerHTML =
+    '<div class="cam-idle-icon">📷</div>' +
+    '<div class="cam-idle-txt">Toque para abrir a câmera</div>' +
+    '<div class="cam-idle-sub">Câmera traseira · Alta resolução</div>';
+  document.getElementById("cam-idle").style.display = "flex";
+  document.getElementById("cam-idle").onclick = iniciarCamera;
+  document.getElementById("cam-guide").style.display   = "none";
+  document.getElementById("cam-guide-b").style.display = "none";
+  document.getElementById("cam-crosshair").style.display = "none";
+  document.getElementById("cam-controls").classList.remove("visible");
+  document.getElementById("cam-quality").style.display = "none";
+  document.getElementById("cam-zoom").style.display    = "none";
+  camAtiva = false;
+}
+
+function tirarFoto() {
+  var video  = document.getElementById("video");
+  var canvas = document.getElementById("canvas");
+  if (!camAtiva || !video.videoWidth) return;
+
+  // Flash visual
+  var flash = document.getElementById("cam-flash");
+  flash.style.opacity = "0.9";
+  setTimeout(function(){ flash.style.opacity = "0"; }, 150);
+
+  // Captura em resolução máxima
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  var ctx = canvas.getContext("2d");
+
+  // Espelha câmera frontal (selfie fica no sentido natural)
+  if (facingMode === "user") {
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.setTransform(1,0,0,1,0,0); // reset antes do carimbo
+  } else {
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  }
+
+  // Carimbo GPS + hora + candidato
+  var now = new Date().toLocaleString("pt-BR", {
+    day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"
+  });
+  var stamptxt = "📍 Campanha David Almeida · " + now;
+  if (gpsData) stamptxt += " · GPS " + gpsData.lat.toFixed(5)+","+gpsData.lng.toFixed(5);
+
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.fillRect(0, canvas.height-44, canvas.width, 44);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold " + Math.round(canvas.width/55) + "px Arial";
+  ctx.fillText(stamptxt, 12, canvas.height-14);
+
+  // Salva como JPEG alta qualidade
+  fotoBase64 = canvas.toDataURL("image/jpeg", 0.92);
+
+  // Mostra preview
+  var prev = document.getElementById("foto-preview");
+  prev.src = fotoBase64;
+  prev.style.display = "block";
+
+  // Esconde vídeo, mostra controles de preview
+  video.style.display = "none";
+  document.getElementById("cam-guide").style.display    = "none";
+  document.getElementById("cam-guide-b").style.display  = "none";
+  document.getElementById("cam-crosshair").style.display= "none";
+  document.getElementById("cam-controls").classList.remove("visible");
+  document.getElementById("cam-preview-controls").classList.add("visible");
+  document.getElementById("cam-quality").style.display  = "none";
+
+  // Carimbo visual no preview
+  var stamp = document.getElementById("foto-stamp");
+  stamp.textContent = stamptxt;
+  stamp.style.display = "block";
+
+  camAtiva = false;
+}
+
+function confirmarFoto() {
+  document.getElementById("cam-preview-controls").classList.remove("visible");
+  showFb("ok", "✅ Foto confirmada! " + Math.round(fotoBase64.length/1024) + "KB");
+}
+
+function toggleCamera() { iniciarCamera(); }
 
 function tirarFoto() {
   const video  = document.getElementById("video");
@@ -409,6 +724,32 @@ function tirarFoto() {
   camAtiva = false;
   document.getElementById("btn-cam").style.display = "none";
   document.getElementById("btn-retake").style.display = "block";
+}
+
+function usarFotoFallback(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    fotoBase64 = e.target.result;
+    var prev = document.getElementById("foto-preview");
+    prev.src = fotoBase64;
+    prev.style.display = "block";
+    document.getElementById("cam-overlay").style.display = "none";
+    var info = document.getElementById("foto-info");
+    var now = new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    if (info) {
+      info.style.display = "block";
+      info.textContent = "📷 Foto selecionada · " + now +
+        (gpsData ? " · GPS " + gpsData.lat.toFixed(4) + "," + gpsData.lng.toFixed(4) : "");
+    }
+    document.getElementById("btn-cam").innerHTML = "✅ Foto selecionada";
+    document.getElementById("btn-fallback").style.display = "none";
+    document.getElementById("btn-retake").style.display = "block";
+    camAtiva = false;
+    showFb("ok", "✅ Foto carregada com sucesso!");
+  };
+  reader.readAsDataURL(file);
 }
 
 function retake() {
@@ -526,14 +867,14 @@ function renderHistorico() {
     return `<div class="hist-item">
       ${thumb}
       <div class="hist-info">
-        <div class="hist-tipo">${ico} ${c.tipo}</div>
+        <div class="hist-tipo">${ico} ${escHtml(c.tipo)}</div>
         <div class="hist-hora">⏰ ${c.hora} · ${c.eleit ? c.eleit+" eleitores" : "sem contagem"}</div>
         <div class="hist-loc">
           <a href="${c.maps_url}" target="_blank" style="color:var(--blue);text-decoration:none">
             📍 ${c.lat}, ${c.lng} (±${c.acc}m)
           </a>
         </div>
-        ${c.obs ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">${c.obs}</div>` : ""}
+        ${c.obs ? `<div style="font-size:10px;color:var(--muted);margin-top:3px">${escHtml(c.obs)}</div>` : ""}
         <span class="hist-badge ${cls}">${c.hora}</span>
       </div>
     </div>`;
