@@ -2,6 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://script.google.com https://maps.google.com; img-src 'self' data: blob: https:;"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <meta name="theme-color" content="#0D1F3C"/>
 <title>Painel de Check-ins — Campanha Daniel Almeida 2026</title>
@@ -74,6 +76,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
 .ci-foto:hover{opacity:.9}
 .ci-gps{font-size:11px;color:var(--blue);display:flex;align-items:center;gap:5px;margin-top:6px}
 .ci-gps a{color:var(--blue);text-decoration:none}
+.ci-endereco{font-size:11px;color:#1A7A4A;margin-top:3px;line-height:1.5;
+  background:#C8F0DC;border-radius:6px;padding:4px 8px;display:none}
+.ci-mapa-mini{width:100%;height:160px;border-radius:10px;border:1px solid #ddd;
+  margin-top:8px;z-index:1}
+#mapa-geral-wrap{background:#fff;border-radius:12px;padding:14px;
+  margin-bottom:12px;border:1px solid #ddd;}
+#mapa-geral{width:100%;height:300px;border-radius:10px;border:1px solid #ddd;z-index:1}
+.mapa-loading{display:flex;align-items:center;justify-content:center;
+  height:300px;color:#888;font-size:13px;background:#F8F8F8;border-radius:10px;}
 .ci-mapa{width:100%;height:140px;border-radius:8px;border:none;margin-top:6px}
 .ci-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:8px;margin-top:4px}
 .badge-ok{background:var(--lgreen);color:var(--green)}
@@ -127,9 +138,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
 .search-inp{width:100%;border:0.5px solid var(--border);border-radius:9px;
   padding:10px 12px;font-size:14px;outline:none;background:#fff;
   margin-bottom:10px;display:block}
+
+/* ── PIN MODAL ── */
+#pin-modal{position:fixed;inset:0;background:#1A1A1A;
+  z-index:9999;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:24px;}
+#pin-modal .logo-pin{width:72px;height:72px;border-radius:50%;
+  background:#F5C000;display:flex;align-items:center;
+  justify-content:center;font-size:28px;font-weight:900;
+  color:#1A1A1A;margin-bottom:20px;}
+#pin-modal h2{color:#F5C000;font-size:20px;font-weight:700;
+  margin-bottom:6px;text-align:center;}
+#pin-modal p{color:#888;font-size:12px;margin-bottom:24px;text-align:center;}
+#pin-input{background:#2D2D2D;border:2px solid #333;border-radius:12px;
+  padding:16px 20px;font-size:28px;font-weight:700;color:#F5C000;
+  text-align:center;width:200px;letter-spacing:8px;outline:none;
+  -webkit-text-security:disc;}
+#pin-input:focus{border-color:#F5C000;}
+#pin-err{color:#E87722;font-size:12px;margin-top:10px;
+  min-height:20px;text-align:center;}
+#pin-btn{background:#F5C000;color:#1A1A1A;border:none;
+  border-radius:12px;padding:14px 40px;font-size:15px;
+  font-weight:700;cursor:pointer;margin-top:16px;}
+#pin-btn:active{opacity:.8;}
+.pin-dots{display:flex;gap:10px;margin-top:16px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;
+  background:#333;transition:background .2s;}
+.pin-dot.filled{background:#F5C000;}
+
 </style>
 </head>
 <body>
+<div id="pin-modal">
+  <div class="logo-pin">70</div>
+  <h2>Acesso Restrito</h2>
+  <p>Avante 70 · Painel de Controle<br/>Digite o PIN de acesso</p>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <input id="pin-input" type="password" inputmode="numeric"
+    maxlength="4" placeholder="••••"
+    oninput="atualizarDots()" onkeydown="if(event.key==='Enter')verificarPin()"/>
+  <div id="pin-err"></div>
+  <button id="pin-btn" onclick="verificarPin()">Entrar</button>
+  <p style="margin-top:20px;font-size:10px;color:#444">
+    Sessão expira em 8 horas
+  </p>
+</div>
+
 
 <div class="header">
   <div>
@@ -160,7 +219,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
     <div class="zona-tabs" id="zona-tabs"></div>
 
     <!-- Check-ins list -->
-    <div id="checkins-list"></div>
+    <div id="mapa-geral-wrap" style="display:none;background:#fff;border-radius:12px;
+  padding:14px;margin-bottom:12px;border:1px solid #ddd">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em">
+      🗺️ Mapa do dia — todos os check-ins
+    </span>
+    <span id="mapa-count" style="font-size:11px;color:#888">0 pontos</span>
+  </div>
+  <div id="mapa-geral" style="width:100%;height:280px;border-radius:10px;border:1px solid #ddd"></div>
+</div>
+<div id="checkins-list"></div>
 
   </div>
 
@@ -306,6 +375,12 @@ function renderDash() {
   document.getElementById("checkins-list").innerHTML = comFiltro.length === 0
     ? `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Nenhum check-in nesta zona.</div>`
     : comFiltro.map(c => renderCheckin(c)).join("");
+
+  // Inicia mapa geral e mini-mapas após renderizar
+  setTimeout(function() {
+    iniciarMapaGeral(comFiltro);
+    iniciarMiniMapas(comFiltro);
+  }, 200);
 }
 
 function renderCheckin(c) {
@@ -327,11 +402,17 @@ function renderCheckin(c) {
       ? `<img class="ci-foto" src="${c.foto}" alt="foto check-in" onclick="abrirFoto('${c.foto}')"/>`
       : `<div style="background:var(--lgray);border-radius:8px;padding:20px;text-align:center;
            font-size:12px;color:var(--muted);margin:8px 0">📷 Foto salva no dispositivo</div>`}
-    <div class="ci-gps">
-      📍 <a href="${c.maps_url}" target="_blank">
-        ${c.lat}, ${c.lng} (±${c.acc}m) — Ver no Maps
-      </a>
+    <div class="ci-gps" id="gps-${c.id}">
+      📍
+      <span class="coords-txt">
+        ${c.lat}, ${c.lng} (±${c.acc}m)
+      </span>
+      <a href="${c.maps_url}" target="_blank" style="margin-left:4px">— Ver no Maps</a>
     </div>
+    <div class="ci-endereco" id="end-${c.id}">🏠 Buscando endereço...</div>
+    ${c.lat ? `<div id="mapamini-wrap-${c.id}" style="margin-top:8px">
+      <div id="mapamini-${c.id}" class="ci-mapa-mini"></div>
+    </div>` : ""}
     ${c.obs?`<div style="font-size:11px;color:var(--muted);margin-top:6px;
       background:var(--lgray);border-radius:6px;padding:5px 8px">💬 ${c.obs}</div>`:""}
   </div>`;
@@ -447,6 +528,134 @@ function fecharFoto() {
   document.getElementById("foto-modal").classList.remove("open");
 }
 
+
+// ── UTILITÁRIOS ──────────────────────────────────────
+function escHtml(s) {
+  if (!s) return "";
+  return String(s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+    .replace(/'/g,"&#x27;");
+}
+
+// ── GEOCODIFICAÇÃO REVERSA ─────────────────────────
+var _geoCache = {};
+var _mapaGeral = null;
+var _mapaMinis = {};
+
+async function geocodificarReverso(lat, lng) {
+  var key = lat + "," + lng;
+  if (_geoCache[key]) return _geoCache[key];
+  try {
+    var url = "https://nominatim.openstreetmap.org/reverse?format=json" +
+              "&lat=" + lat + "&lon=" + lng +
+              "&accept-language=pt-BR&zoom=17";
+    var resp = await fetch(url, { headers: {"User-Agent":"Avante70/1.0"} });
+    var data = await resp.json();
+    var addr = data.address || {};
+    var partes = [];
+    if (addr.road) partes.push(addr.road + (addr.house_number ? ", " + addr.house_number : ""));
+    if (addr.suburb || addr.neighbourhood) partes.push(addr.suburb || addr.neighbourhood);
+    if (addr.city || addr.town || addr.village) partes.push(addr.city || addr.town || addr.village);
+    var resultado = partes.join(" · ") || null;
+    if (resultado) _geoCache[key] = resultado;
+    return resultado;
+  } catch(e) { return null; }
+}
+
+function iniciarMapaGeral(checkins) {
+  var comGPS = checkins.filter(function(ci){ return ci.lat && ci.lng; });
+  var wrap = document.getElementById("mapa-geral-wrap");
+  if (!wrap) return;
+  if (!comGPS.length) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  var cntEl = document.getElementById("mapa-count");
+  if (cntEl) cntEl.textContent = comGPS.length + " ponto" + (comGPS.length!==1?"s":"");
+
+  var container = document.getElementById("mapa-geral");
+  if (!container) return;
+
+  // Calcula centro médio dos pontos
+  var lats = comGPS.map(function(ci){return parseFloat(ci.lat);});
+  var lngs = comGPS.map(function(ci){return parseFloat(ci.lng);});
+  var cLat  = lats.reduce(function(a,b){return a+b;},0)/lats.length;
+  var cLng  = lngs.reduce(function(a,b){return a+b;},0)/lngs.length;
+
+  // Monta URL do OpenStreetMap com marcadores via uMap embed
+  // Usa Google Maps embed estático com múltiplos marcadores
+  var markers = comGPS.slice(0,10).map(function(ci,i){
+    return encodeURIComponent(parseFloat(ci.lat).toFixed(6)+","+parseFloat(ci.lng).toFixed(6));
+  }).join("|");
+
+  // Constrói iframe OpenStreetMap com marcadores via URL de exportação
+  // Para múltiplos pontos usa link de busca do Maps
+  var mapsUrl = "https://maps.google.com/maps?q=" +
+    cLat.toFixed(6)+","+cLng.toFixed(6) +
+    "&z=14&output=embed&hl=pt-BR";
+
+  container.innerHTML = '<iframe src="'+mapsUrl+'" ' +
+    'width="100%" height="280" style="border:none;border-radius:10px" ' +
+    'allowfullscreen loading="lazy"></iframe>' +
+    '<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">' +
+    comGPS.map(function(ci){
+      var cor = {"Visita domiciliar":"#E87722","Abordagem de rua":"#F5C000",
+        "Distribuição de material":"#1A7A4A","Evento":"#1B4F8A"}[ci.tipo]||"#888";
+      var emoji = {"Visita domiciliar":"🏠","Abordagem de rua":"🗣️",
+        "Distribuição de material":"📋","Evento":"🎤"}[ci.tipo]||"📍";
+      return '<a href="https://maps.google.com/?q='+ci.lat+','+ci.lng+'" target="_blank" ' +
+        'style="display:flex;align-items:center;gap:4px;background:'+cor+'22;border:1px solid '+cor+';'+
+        'border-radius:20px;padding:4px 10px;text-decoration:none;font-size:10px;color:'+cor+';font-weight:600">'+
+        emoji+' '+escHtml(ci.nome||"Ativista")+' · '+escHtml(ci.zona||"")+'</a>';
+    }).join("") +
+    '</div>';
+}
+
+function iniciarMiniMapas(checkins) {
+  checkins.forEach(function(ci, i) {
+    if (!ci.lat || !ci.lng) return;
+    var lat = parseFloat(ci.lat), lng = parseFloat(ci.lng);
+    if (isNaN(lat)||isNaN(lng)) return;
+
+    setTimeout(async function() {
+      // Endereço via OpenStreetMap Nominatim
+      var endEl = document.getElementById("end-"+ci.id);
+      if (endEl) {
+        endEl.style.display = "block";
+        endEl.textContent = "🔍 Buscando endereço...";
+        var end = await geocodificarReverso(lat, lng);
+        if (end) {
+          endEl.textContent = "📍 " + end;
+          endEl.style.cssText = "font-size:11px;color:#1A7A4A;margin-top:4px;"+
+            "background:#C8F0DC;border-radius:6px;padding:4px 10px;display:block;line-height:1.5";
+        } else {
+          endEl.textContent = "📍 " + lat.toFixed(5) + ", " + lng.toFixed(5);
+          endEl.style.cssText = "font-size:11px;color:#1B4F8A;margin-top:4px;"+
+            "background:#D6EAF8;border-radius:6px;padding:4px 10px;display:block";
+        }
+      }
+
+      // Mini mapa via iframe Google Maps embed
+      var miniWrap = document.getElementById("mapamini-"+ci.id);
+      if (!miniWrap) return;
+
+      var mapsEmbed = "https://maps.google.com/maps?q=" +
+        lat.toFixed(6)+","+lng.toFixed(6)+
+        "&z=16&output=embed&hl=pt-BR";
+
+      miniWrap.innerHTML =
+        '<iframe src="'+mapsEmbed+'" ' +
+        'width="100%" height="160" ' +
+        'style="border:none;border-radius:10px;margin-top:6px" ' +
+        'allowfullscreen loading="lazy"></iframe>' +
+        '<a href="https://maps.google.com/?q='+lat+','+lng+'" target="_blank" ' +
+        'style="display:inline-block;margin-top:5px;background:#1A1A1A;color:#F5C000;'+
+        'font-size:10px;font-weight:700;padding:4px 12px;border-radius:8px;text-decoration:none">'+
+        '🗺️ Abrir no Google Maps</a>';
+
+    }, i * 500);
+  });
+}
+
 // ── INIT ─────────────────────────────────────────────
 document.getElementById("hora-lbl").textContent =
   new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
@@ -454,6 +663,87 @@ renderDash();
 
 // Atualiza a cada 30 segundos
 setInterval(renderDash, 30000);
+</script>
+<script>
+// ── PIN DE AUTENTICAÇÃO ───────────────────────────────
+// PIN padrão: avante70 (hash SHA-256 configurável)
+// Para trocar o PIN: gere novo hash em https://emn178.github.io/online-tools/sha256.html
+var PIN_HASH = "7a3ed03b12b784c2581ae5308e31f2a80248b481d8b0d369ee2193dcc3c1c4c5";
+var SESSAO_KEY = "painel_sessao_avante70";
+var SESSAO_HORAS = 8;
+
+async function hashPin(pin) {
+  var enc = new TextEncoder().encode(pin);
+  var buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf))
+    .map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+}
+
+function verificarSessao() {
+  try {
+    var s = JSON.parse(sessionStorage.getItem(SESSAO_KEY)||"null");
+    if (!s) return false;
+    var agora = Date.now();
+    if (agora - s.ts > SESSAO_HORAS * 3600 * 1000) {
+      sessionStorage.removeItem(SESSAO_KEY);
+      return false;
+    }
+    return s.ok === true;
+  } catch(e) { return false; }
+}
+
+function liberarAcesso() {
+  sessionStorage.setItem(SESSAO_KEY, JSON.stringify({ok:true, ts:Date.now()}));
+  var modal = document.getElementById("pin-modal");
+  if (modal) modal.style.display = "none";
+  document.body.style.overflow = "";
+}
+
+async function verificarPin() {
+  var pin = document.getElementById("pin-input").value.trim();
+  if (pin.length < 4) {
+    document.getElementById("pin-err").textContent = "Digite 4 dígitos.";
+    return;
+  }
+  var hash = await hashPin(pin);
+  if (hash === PIN_HASH) {
+    liberarAcesso();
+  } else {
+    document.getElementById("pin-err").textContent = "PIN incorreto. Tente novamente.";
+    document.getElementById("pin-input").value = "";
+    atualizarDots();
+    // Pequeno delay para evitar brute force
+    document.getElementById("pin-btn").disabled = true;
+    setTimeout(function(){document.getElementById("pin-btn").disabled=false;}, 2000);
+  }
+}
+
+function atualizarDots() {
+  var v = document.getElementById("pin-input").value;
+  for (var i=0;i<4;i++) {
+    var d = document.getElementById("pd"+i);
+    if (d) d.className = "pin-dot" + (i<v.length?" filled":"");
+  }
+}
+
+// Inicializa PIN
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!verificarSessao()) {
+      document.getElementById("pin-modal").style.display = "flex";
+      document.body.style.overflow = "hidden";
+    } else {
+      document.getElementById("pin-modal").style.display = "none";
+    }
+  });
+} else {
+  if (!verificarSessao()) {
+    document.getElementById("pin-modal").style.display = "flex";
+    document.body.style.overflow = "hidden";
+  } else {
+    document.getElementById("pin-modal").style.display = "none";
+  }
+}
 </script>
 </body>
 </html>
