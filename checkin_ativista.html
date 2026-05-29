@@ -853,27 +853,39 @@ function enviarCheckin() {
   var img = new Image();
   img.src = "https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec?" + p;
 
-  // Envia foto via formulário POST (compatível com Apps Script)
+  // Envia foto comprimida via POST application/x-www-form-urlencoded
   if (fotoBase64) {
     setTimeout(function() {
       try {
-        var fotoComprimida = comprimirFoto(fotoBase64, 600, 0.5);
-        // Usa XMLHttpRequest que funciona melhor com Apps Script
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec", true);
-        xhr.setRequestHeader("Content-Type", "text/plain");
-        xhr.send(JSON.stringify({
-          acao:  "salvar_foto",
-          token: "avante70-am-2026-token-secreto",
-          id:    String(checkin.id),
-          nome:  checkin.nome,
-          dia:   checkin.dia,
-          foto:  fotoComprimida
-        }));
-        xhr.onload = function() { console.log("Foto enviada:", xhr.status); };
-        xhr.onerror = function() { console.log("Foto erro de rede"); };
-      } catch(e) { console.log("Foto ex:", e); }
-    }, 2000);
+        var canvas2 = document.createElement("canvas");
+        var img2    = new window.Image();
+        img2.onload = function() {
+          // Reduz para 400px max — cabe em POST
+          var ratio  = Math.min(400/img2.width, 400/img2.height, 1);
+          canvas2.width  = Math.round(img2.width  * ratio);
+          canvas2.height = Math.round(img2.height * ratio);
+          var ctx2 = canvas2.getContext("2d");
+          ctx2.drawImage(img2, 0, 0, canvas2.width, canvas2.height);
+          var fotoMin = canvas2.toDataURL("image/jpeg", 0.4);
+
+          var formData = new FormData();
+          formData.append("acao",  "salvar_foto");
+          formData.append("token", "avante70-am-2026-token-secreto");
+          formData.append("id",    String(checkin.id));
+          formData.append("nome",  checkin.nome);
+          formData.append("dia",   checkin.dia);
+          formData.append("foto",  fotoMin);
+
+          fetch("https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec", {
+            method: "POST",
+            mode: "no-cors",
+            body: formData
+          }).then(function(){ console.log("Foto enviada!"); })
+            .catch(function(e){ console.log("Foto err:", e); });
+        };
+        img2.src = fotoBase64;
+      } catch(e2) { console.log("Foto compressão:", e2); }
+    }, 3000);
   }
 
   // 4. Limpa campos após 1 segundo
