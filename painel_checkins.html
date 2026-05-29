@@ -308,11 +308,53 @@ const CHECKINS_DEMO = [
 ];
 
 // Carrega check-ins reais do localStorage (do app do ativista na mesma origem)
+// Cache dos check-ins buscados do servidor
+var _checkinsServidor = [];
+var _ultimaBusca = 0;
+
 function carregarCheckins() {
-  const locais = JSON.parse(localStorage.getItem("checkins_hoje") || "[]")
-    .filter(c => c.dia === hoje);
-  const todos = [...CHECKINS_DEMO, ...locais];
-  return todos.sort((a,b) => b.hora.localeCompare(a.hora));
+  // Dados locais (mesmo dispositivo) + servidor
+  var locais = JSON.parse(localStorage.getItem("checkins_hoje") || "[]")
+    .filter(function(c){ return c.dia === hoje; });
+
+  // Merge: servidor tem prioridade, local complementa
+  var idsServidor = new Set(_checkinsServidor.map(function(c){return String(c.id);}));
+  var somenteLocais = locais.filter(function(c){
+    return !idsServidor.has(String(c.id));
+  });
+
+  var todos = _checkinsServidor.concat(somenteLocais);
+
+  // Remove demo se tiver dados reais
+  if (todos.length > 0) {
+    return todos.sort(function(a,b){return b.hora.localeCompare(a.hora);});
+  }
+  return CHECKINS_DEMO.concat(todos).sort(function(a,b){return b.hora.localeCompare(a.hora);});
+}
+
+// Busca check-ins do Google Sheets via webhook
+function buscarCheckinsServidor() {
+  var agora = Date.now();
+  if (agora - _ultimaBusca < 20000) return; // throttle 20s
+  _ultimaBusca = agora;
+
+  var url = "WEBHOOK_URL?acao=listar_checkins&dia=HOJE&token=TOKEN_VAL"
+    .replace("WEBHOOK_URL", "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtKap6hL2EDCNQFuaJrhJBEoJdVqE4MieHJTpZ9IHpRgW17Q/exec")
+    .replace("HOJE", hoje)
+    .replace("TOKEN_VAL", "avante70-am-2026-token-secreto");
+
+  fetch(url, {mode:"cors"})
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data && data.checkins && Array.isArray(data.checkins)) {
+        _checkinsServidor = data.checkins;
+        renderDash();
+      }
+    })
+    .catch(function(e){
+      // Falha silenciosa — usa dados locais
+      console.log("Servidor indisponível, usando dados locais");
+    });
 }
 
 let zonaFiltro = "Todas";
@@ -336,6 +378,7 @@ setInterval(() => {
 
 // ── DASHBOARD ────────────────────────────────────────
 function renderDash() {
+  buscarCheckinsServidor(); // busca dados reais do servidor
   const checkins = carregarCheckins();
   const semFiltro = checkins;
   const comFiltro = zonaFiltro === "Todas" ? semFiltro : semFiltro.filter(c=>c.zona===zonaFiltro);
