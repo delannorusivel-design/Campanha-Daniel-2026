@@ -827,20 +827,26 @@ async function enviarCheckin() {
   checkins.push(checkin);
   localStorage.setItem("checkins_hoje", JSON.stringify(checkins));
 
-  // Tenta enviar ao Google Sheets via Apps Script
-  const sheetsUrl = localStorage.getItem("sheets_webhook");
-  if (sheetsUrl) {
-    try {
-      // Envia sem a foto (foto fica no local por economia)
-      const payload = {...checkin, foto: "[foto_local]"};
-      await fetch(sheetsUrl, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(payload),
-      });
-    } catch(e) { /* silencia erro de rede */ }
-  }
+  // Envia ao Google Sheets via webhook
+  try {
+    var p = new URLSearchParams({
+      acao:     "checkin",
+      token:    "avante70-am-2026-token-secreto",
+      id:       String(checkin.id),
+      dia:      checkin.dia,
+      hora:     checkin.hora,
+      nome:     checkin.nome,
+      zona:     checkin.zona,
+      lider:    checkin.lider||"",
+      tipo:     checkin.tipo,
+      eleit:    String(checkin.eleit),
+      obs:      checkin.obs||"",
+      lat:      String(checkin.lat||""),
+      lng:      String(checkin.lng||""),
+      acc:      String(checkin.acc||""),
+    });
+    new Image().src = "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtKap6hL2EDCNQFuaJrhJBEoJdVqE4MieHJTpZ9IHpRgW17Q/exec?" + p.toString();
+  } catch(e) { console.log("Webhook erro:", e); }
 
   setTimeout(() => {
     btn.disabled = false;
