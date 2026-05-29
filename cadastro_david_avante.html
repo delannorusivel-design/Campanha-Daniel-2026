@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://script.google.com https://maps.google.com; img-src 'self' data: blob: https:;"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#5A1800"/>
@@ -374,7 +377,7 @@ var CAND  = "David Almeida";
 var CARGO = "Governador";
 var NUM   = "70";
 var KEY   = "el_david";
-var WH    = "https://script.google.com/macros/s/AKfycbwPNqTE6AP-udV9x_fEt5MtKap6hL2EDCNQFuaJrhJBEoJdVqE4MieHJTpZ9IHpRgW17Q/exec";
+var WH    = "https://script.google.com/macros/s/AKfycbwo8lkCo7SY3g-Mu0pTkIIgEEBMcdyBn1n41GwWVHSbpCW2ZDSY6a_6DKO6d8p3mRE-/exec";
 var HOJE  = new Date().toISOString().slice(0,10);
 var PRI   = "#E87722";
 var ESC   = "#7D2800";
@@ -471,8 +474,8 @@ function fmtFone(inp) {
 
 // ── SALVAR ────────────────────────────────────────────
 function salvar() {
-  var aNome = document.getElementById("a-nome").value.trim();
-  var eNome = document.getElementById("e-nome").value.trim();
+  var aNome = sanInput(document.getElementById("a-nome").value.trim(), 100);
+  var eNome = sanInput(document.getElementById("e-nome").value.trim(), 100);
   var eFone = document.getElementById("e-fone").value.trim();
 
 
@@ -541,7 +544,7 @@ function salvar() {
   };
 
   dados.push(el);
-  localStorage.setItem(KEY, JSON.stringify(dados));
+  salvarCriptografado(KEY, dados);
 
   try {
     var p = new URLSearchParams({
@@ -556,7 +559,8 @@ function salvar() {
       gps_lng:   gpsLng,
       gps_acc:   String(gpsAcc),
       obs:el.obs, dia:el.dia, hora:el.hora,
-      id:String(el.id), consentimento:"SIM"
+      id:String(el.id), consentimento:"SIM",
+      token:"avante70-am-2026-token-secreto"
     });
     new Image().src = WH + "?" + p.toString();
   } catch(e) { console.log(e); }
@@ -628,14 +632,14 @@ function renderLista() {
   var lblInt={"SIM":"✅ Vai votar","TALVEZ":"🤔 Indeciso","NAO":"❌ Contrário","NAO_SABE":"❓ Não sabe"};
   el.innerHTML=lista.map(function(e){
     return '<div class="lista-card">' +
-      '<div style="font-size:13px;font-weight:600">👤 '+e.nome+'</div>' +
-      '<div style="font-size:11px;color:#888;margin-top:2px">📱 '+e.fone+
+      '<div style="font-size:13px;font-weight:600">👤 '+escHtml(e.nome)+'</div>' +
+      '<div style="font-size:11px;color:#888;margin-top:2px">📱 '+escHtml(e.fone)+
         (e.bairro?' · 📍 '+e.bairro:'')+'</div>' +
-      (e.municipio?'<div style="font-size:11px;color:#888">🌿 '+e.municipio+(e.distrito?' / '+e.distrito:'')+'</div>':'')+
-      (e.rua?'<div style="font-size:11px;color:#888">🛣️ '+e.rua+(e.numero_rua?' nº '+e.numero_rua:'')+'</div>':'')+
-      '<div style="font-size:11px;color:#888">Por: '+e.ativista+' · ⏰ '+e.hora+'</div>'+
+      (e.municipio?'<div style="font-size:11px;color:#888">🌿 '+escHtml(e.municipio)+(e.distrito?' / '+e.distrito:'')+'</div>':'')+
+      (e.rua?'<div style="font-size:11px;color:#888">🛣️ '+escHtml(e.rua)+(e.numero_rua?' nº '+e.numero_rua:'')+'</div>':'')+
+      '<div style="font-size:11px;color:#888">Por: '+escHtml(e.ativista)+' · ⏰ '+e.hora+'</div>'+
       '<div style="margin-top:5px">'+
-        (e.interesse?'<span class="tag">'+e.interesse+'</span>':'')+
+        (e.interesse?'<span class="tag">'+escHtml(e.interesse)+'</span>':'')+
         (e.idade?'<span class="tag">'+e.idade+'</span>':'')+
         (e.intencao?'<span class="tag '+(tagInt[e.intencao]||"tag-ns")+'">'+
           (lblInt[e.intencao]||e.intencao)+'</span>':'')+
@@ -701,6 +705,79 @@ function setGPSStatus(status, txt) {
   bar.className = "gps-bar " + status;
   dot.className = "gps-dot " + status;
   lbl.textContent = txt;
+}
+
+
+
+// ── CRYPTO — localStorage criptografado ──────────────
+var _key = null;
+
+async function getKey() {
+  if (_key) return _key;
+  // Deriva chave do slug do candidato + user agent (fingerprint leve)
+  var raw = (KEY + navigator.userAgent.slice(0,20)).slice(0,32);
+  var enc = new TextEncoder().encode(raw.padEnd(32,"x").slice(0,32));
+  _key = await crypto.subtle.importKey("raw", enc, {name:"AES-GCM"}, false, ["encrypt","decrypt"]);
+  return _key;
+}
+
+async function salvarCriptografado(chave, obj) {
+  try {
+    var k   = await getKey();
+    var iv  = crypto.getRandomValues(new Uint8Array(12));
+    var enc = await crypto.subtle.encrypt(
+      {name:"AES-GCM", iv:iv},
+      k,
+      new TextEncoder().encode(JSON.stringify(obj))
+    );
+    var payload = {
+      iv:  Array.from(iv),
+      ct:  Array.from(new Uint8Array(enc))
+    };
+    localStorage.setItem(chave, JSON.stringify(payload));
+  } catch(e) {
+    // Fallback sem criptografia se Web Crypto não disponível
+    localStorage.setItem(chave, JSON.stringify(obj));
+  }
+}
+
+async function carregarDescriptografado(chave) {
+  try {
+    var raw = localStorage.getItem(chave);
+    if (!raw) return [];
+    var payload = JSON.parse(raw);
+    if (!payload.iv || !payload.ct) return payload; // formato antigo
+    var k   = await getKey();
+    var dec = await crypto.subtle.decrypt(
+      {name:"AES-GCM", iv:new Uint8Array(payload.iv)},
+      k,
+      new Uint8Array(payload.ct)
+    );
+    return JSON.parse(new TextDecoder().decode(dec));
+  } catch(e) {
+    // Tenta ler sem criptografia (migração de dados antigos)
+    try { return JSON.parse(localStorage.getItem(chave)||"[]"); } catch(e2) { return []; }
+  }
+}
+
+// ── SEGURANÇA ─────────────────────────────────────────
+// Escapa HTML para prevenir XSS
+function escHtml(s) {
+  if (!s) return "";
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#x27;");
+}
+
+// Sanitiza entrada — remove fórmulas e limita tamanho
+function sanInput(s, max) {
+  if (!s) return "";
+  var v = String(s).trim().slice(0, max||300);
+  if (v && ["=","@","+","-"].indexOf(v[0]) >= 0) v = "'" + v;
+  return v.replace(/<[^>]*>/g,"");
 }
 
 // ── INIT ──────────────────────────────────────────────
