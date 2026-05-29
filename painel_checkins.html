@@ -200,7 +200,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
     <span class="sec-lbl">Novo check-in</span>
 
     <!-- Camera -->
-    <div class="camera-wrap" id="camera-wrap" onclick="toggleCamera()" style="cursor:pointer">
+    <div class="camera-wrap" id="camera-wrap" onclick="toggleCamera()" style="cursor:pointer;-webkit-tap-highlight-color:rgba(255,255,255,.15)">
       <video id="video" autoplay playsinline muted></video>
       <div class="camera-overlay" id="cam-overlay">
         <div class="camera-icon">📷</div>
@@ -258,6 +258,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
     </button>
     <button class="btn-cam secondary" id="btn-retake" onclick="retake()" style="display:none">
       🔄 Tirar outra foto
+    </button>
+    <!-- Fallback para iOS: input file direto -->
+    <input type="file" id="file-fallback" accept="image/*" capture="environment"
+      style="display:none" onchange="usarFotoFallback(this)"/>
+    <button class="btn-cam secondary" id="btn-fallback"
+      onclick="document.getElementById('file-fallback').click()"
+      style="background:#1B4F8A;margin-top:4px">
+      📁 Usar galeria / câmera (alternativo)
     </button>
     <button class="btn-send" id="btn-send" onclick="enviarCheckin()">
       ✅ Enviar check-in
@@ -359,22 +367,69 @@ function setGPS(status, txt) {
 }
 
 // ── CÂMERA ──────────────────────────────────────────
-async function toggleCamera() {
+function toggleCamera() {
   if (camAtiva) { tirarFoto(); return; }
-  try {
-    streamV = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment", width:{ideal:1280}, height:{ideal:960} },
-      audio: false
+
+  // iOS Safari requer que getUserMedia seja chamado diretamente
+  // de um evento de toque do usuário — sem async/await no handler
+  var constraints = {
+    audio: false,
+    video: {
+      facingMode: { ideal: "environment" }, // câmera traseira
+      width:  { ideal: 1280 },
+      height: { ideal: 960  }
+    }
+  };
+
+  // Atualiza UI imediatamente antes do prompt de permissão
+  document.getElementById("cam-overlay").innerHTML =
+    '<div class="camera-icon">⏳</div>' +
+    '<div class="camera-txt">Aguardando permissão...</div>';
+
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(function(stream) {
+      streamV = stream;
+      var video = document.getElementById("video");
+      // iOS Safari precisa de setAttribute antes de srcObject
+      video.setAttribute("autoplay", "");
+      video.setAttribute("muted", "");
+      video.setAttribute("playsinline", "");
+      video.srcObject = stream;
+      video.play().then(function() {
+        document.getElementById("cam-overlay").style.display = "none";
+        document.getElementById("foto-preview").style.display = "none";
+        var btn = document.getElementById("btn-cam");
+        if (btn) btn.innerHTML = "📸 Tirar foto";
+        camAtiva = true;
+      }).catch(function(playErr) {
+        // iOS às vezes precisa de interação manual para play()
+        document.getElementById("cam-overlay").innerHTML =
+          '<div class="camera-icon">▶️</div>' +
+          '<div class="camera-txt">Toque para iniciar o vídeo</div>';
+        document.getElementById("cam-overlay").style.display = "flex";
+        document.getElementById("camera-wrap").onclick = function() {
+          video.play();
+          document.getElementById("cam-overlay").style.display = "none";
+          camAtiva = true;
+          document.getElementById("camera-wrap").onclick = toggleCamera;
+        };
+      });
+    })
+    .catch(function(err) {
+      var msg = "Câmera não disponível.";
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        msg = "Permissão negada. Vá em Ajustes > Safari > Câmera e permita o acesso.";
+      } else if (err.name === "NotFoundError") {
+        msg = "Câmera não encontrada neste dispositivo.";
+      } else if (err.name === "NotSupportedError") {
+        msg = "Use o Safari para acessar a câmera no iPhone.";
+      }
+      document.getElementById("cam-overlay").innerHTML =
+        '<div class="camera-icon">❌</div>' +
+        '<div class="camera-txt">' + msg + '</div>';
+      document.getElementById("cam-overlay").style.display = "flex";
+      showFb("err", msg);
     });
-    const video = document.getElementById("video");
-    video.srcObject = streamV;
-    document.getElementById("cam-overlay").style.display = "none";
-    document.getElementById("foto-preview").style.display = "none";
-    document.getElementById("btn-cam").innerHTML = "📸 Tirar foto";
-    camAtiva = true;
-  } catch(e) {
-    showFb("err", "Câmera não permitida. Verifique as permissões do navegador.");
-  }
 }
 
 function tirarFoto() {
@@ -417,6 +472,32 @@ function tirarFoto() {
   camAtiva = false;
   document.getElementById("btn-cam").style.display = "none";
   document.getElementById("btn-retake").style.display = "block";
+}
+
+function usarFotoFallback(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    fotoBase64 = e.target.result;
+    var prev = document.getElementById("foto-preview");
+    prev.src = fotoBase64;
+    prev.style.display = "block";
+    document.getElementById("cam-overlay").style.display = "none";
+    var info = document.getElementById("foto-info");
+    var now = new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    if (info) {
+      info.style.display = "block";
+      info.textContent = "📷 Foto selecionada · " + now +
+        (gpsData ? " · GPS " + gpsData.lat.toFixed(4) + "," + gpsData.lng.toFixed(4) : "");
+    }
+    document.getElementById("btn-cam").innerHTML = "✅ Foto selecionada";
+    document.getElementById("btn-fallback").style.display = "none";
+    document.getElementById("btn-retake").style.display = "block";
+    camAtiva = false;
+    showFb("ok", "✅ Foto carregada com sucesso!");
+  };
+  reader.readAsDataURL(file);
 }
 
 function retake() {
